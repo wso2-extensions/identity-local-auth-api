@@ -21,6 +21,16 @@ package org.wso2.carbon.identity.local.auth.api.core.exception;
  */
 public class AuthAPIClientException extends AuthAPIException {
 
+    public void setRedirectURL(String redirectURL) {
+        this.redirectURL = redirectURL;
+    }
+
+    private String redirectURL;
+
+    public String getRedirectURL() {
+        return redirectURL;
+    }
+
     public AuthAPIClientException() {
 
     }
@@ -30,9 +40,16 @@ public class AuthAPIClientException extends AuthAPIException {
         super(message, errorCode);
     }
 
-    public AuthAPIClientException(String message, String errorCode, Throwable cause) {
+    public AuthAPIClientException(String message, String errorCode, String retryParams) {
+
+        super(message, errorCode);
+        this.redirectURL = retryParams;
+    }
+
+    public AuthAPIClientException(String message, String errorCode, String retryParams, Throwable cause) {
 
         super(message, errorCode, cause);
+        this.redirectURL = retryParams;
     }
 
     public AuthAPIClientException(Throwable cause) {

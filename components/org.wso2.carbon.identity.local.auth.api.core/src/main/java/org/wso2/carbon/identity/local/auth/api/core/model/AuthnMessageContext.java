@@ -1,5 +1,6 @@
 package org.wso2.carbon.identity.local.auth.api.core.model;
 
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.bean.context.MessageContext;
 
@@ -12,6 +13,7 @@ public class AuthnMessageContext extends MessageContext<String, Object> implemen
     protected User user;
     protected AuthnToken authnToken;
     protected AuthnStatus authnStatus;
+    protected AuthenticationContext authnContext;
 
     public User getUser() {
         return user;
@@ -35,5 +37,13 @@ public class AuthnMessageContext extends MessageContext<String, Object> implemen
 
     public void setAuthnStatus(AuthnStatus authnStatus) {
         this.authnStatus = authnStatus;
+    }
+
+    public AuthenticationContext getAuthnContext() {
+        return authnContext;
+    }
+
+    public void setAuthnContext(AuthenticationContext authnContext) {
+        this.authnContext = authnContext;
     }
 }

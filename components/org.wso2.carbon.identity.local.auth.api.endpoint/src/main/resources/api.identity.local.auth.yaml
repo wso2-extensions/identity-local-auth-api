@@ -122,6 +122,8 @@ definitions:
         type: string
       password:
        type: string
+      sessionDataKey:
+       typr:string
        
 #-----------------------------------------------------    
 # Authentication success response  object
@@ -144,5 +146,6 @@ definitions:
         type: string
       description:
         type: string
-    
+      redirectURL:
+        type: string
 

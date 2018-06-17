@@ -4,7 +4,15 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
+import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
+import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
+import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.model.User;
+import org.wso2.carbon.identity.core.model.IdentityErrorMsgContext;
+import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
+import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.local.auth.api.core.constants.AuthAPIConstants;
 import org.wso2.carbon.identity.local.auth.api.core.exception.AuthAPIClientException;
 import org.wso2.carbon.identity.local.auth.api.core.exception.AuthAPIException;
@@ -17,16 +25,24 @@ import org.wso2.carbon.identity.local.auth.api.core.model.AuthnStatus;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
+import org.wso2.carbon.user.core.UserCoreConstants;
 import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AuthManagerImpl implements AuthManager {
 
     private static final Log log = LogFactory.getLog(AuthManagerImpl.class);
     protected AuthTokenGenerator authTokenGenerator;
+    private static String RE_CAPTCHA_USER_DOMAIN = "user-domain-recaptcha";
+    private static String BACK_CHANNEL_AUTHENTICATOR_NAME = "BackchannelBasicAuthenticator";
+
 
     public AuthManagerImpl(AuthTokenGenerator authTokenGenerator) {
         this.authTokenGenerator = authTokenGenerator;
@@ -36,6 +52,7 @@ public class AuthManagerImpl implements AuthManager {
     public AuthnResponse authenticate(AuthnRequest request) throws AuthAPIException {
 
         AuthnMessageContext authnMessageContext = new AuthnMessageContext();
+        authnMessageContext.setAuthnContext((AuthenticationContext) request.getParameter(AuthAPIConstants.AUTH_CONTEXT));
         if (AuthAPIConstants.AuthType.VIA_AUTHORIZATION_HEADER.name().equals(request.getAuthType())) {
 
             authenticate(String.valueOf(request.getParameter(AuthAPIConstants.AUTH_PARAM_AUTHORIZATION_HEADER)),
@@ -104,7 +121,7 @@ public class AuthManagerImpl implements AuthManager {
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
         UserStoreManager userStoreManager = getUserStoreManager(userTenantDomain);
 
-        if (authenticate(tenantAwareUsername, credential, userStoreManager)) {
+        if (authenticate(tenantAwareUsername, credential, userStoreManager, authnMessageContext.getAuthnContext())) {
             User user = new User();
             user.setUserName(tenantAwareUsername);
             user.setTenantDomain(userTenantDomain);
@@ -135,15 +152,96 @@ public class AuthManagerImpl implements AuthManager {
         }
     }
 
-    private boolean authenticate(String username, Object credential, UserStoreManager userStoreManager) throws
+    private boolean authenticate(String username, Object credential, UserStoreManager userStoreManager,
+                                 AuthenticationContext context) throws
             AuthAPIClientException {
 
         try {
             return userStoreManager.authenticate(username, credential);
         } catch (UserStoreException e) {
-            throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage(),
-                    AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode(), e);
+            String errorMessage = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage();
+            String errorCode = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode();
+            IdentityErrorMsgContext errorContext = IdentityUtil.getIdentityErrorMsg();
+            IdentityUtil.clearIdentityErrorMsg();
+            String retryParam = "&authFailure=true&authFailureMsg=login.fail.message";
+            String encodedUsername = getEncoded(username, retryParam, e);
+            String loginPage = ConfigurationFacade.getInstance().getAuthenticationEndpointURL();
+
+            String redirectURL;
+            if (isShowAuthFailureReason()) {
+                if (errorContext != null) {
+                    errorCode = errorContext.getErrorCode();
+                    int remainingAttempts = errorContext.getMaximumLoginAttempts() - errorContext.getFailedLoginAttempts();
+
+                    if (log.isDebugEnabled()) {
+                        StringBuilder debugString = new StringBuilder();
+                        debugString.append("Identity error message context is not null. Error details are as follows.");
+                        debugString.append("errorCode : " + errorCode + "\n");
+                        debugString.append("username : " + username + "\n");
+                        debugString.append("remainingAttempts : " + remainingAttempts);
+                        log.debug(debugString.toString());
+                    }
+
+                    if (errorCode.equals(UserCoreConstants.ErrorCode.INVALID_CREDENTIAL)) {
+                        retryParam = retryParam + "&errorCode=" + errorCode + "&failedUsername=" + encodedUsername +
+                                "&remainingAttempts=" + remainingAttempts;
+                        redirectURL = loginPage + ("?" + context.getContextIdIncludedQueryParams())
+                                + "&authenticators=BackchannelBasicAuthenticator:" + FrameworkConstants.LOCAL + retryParam;
+                    } else if (errorCode.equals(UserCoreConstants.ErrorCode.USER_IS_LOCKED)) {
+                        if (remainingAttempts == 0) {
+                            redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
+                                    "&errorCode=" + errorCode + "&failedUsername=" + encodedUsername +
+                                    "&remainingAttempts=0" + "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" +
+                                    FrameworkConstants.LOCAL + retryParam;
+                        } else {
+                            redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() + "&errorCode=" + errorCode + "&failedUsername="
+                                    + encodedUsername + "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" +
+                                    FrameworkConstants.LOCAL + retryParam;
+                        }
+                    } else if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_NOT_CONFIRMED_ERROR_CODE)) {
+                        retryParam = "&authFailure=true&authFailureMsg=account.confirmation.pending";
+                        Object domain = IdentityUtil.threadLocalProperties.get().get(RE_CAPTCHA_USER_DOMAIN);
+                        if (domain != null) {
+                            username = IdentityUtil.addDomainToName(username, domain.toString());
+                            encodedUsername = getEncoded(username, retryParam, e);
+                        }
+
+                        retryParam = retryParam + "&errorCode=" + errorCode + "&failedUsername=" + encodedUsername;
+                        redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
+                                "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants.LOCAL + retryParam;
+                    } else {
+                        retryParam = retryParam + "&errorCode=" + errorCode + "&failedUsername=" + encodedUsername;
+                        redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
+                                "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants.LOCAL + retryParam;
+                    }
+                } else {
+                    redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
+                            "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants.LOCAL + retryParam;
+                }
+            } else {
+                errorCode = errorContext != null ? errorContext.getErrorCode() : null;
+                if (errorCode != null && errorCode.equals(UserCoreConstants.ErrorCode.USER_IS_LOCKED)) {
+                    redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() + "&failedUsername=" +
+                            encodedUsername + "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants
+                            .LOCAL + retryParam;
+                } else {
+                    redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
+                            "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants.LOCAL + retryParam;
+                }
+            }
+            throw new AuthAPIClientException(errorMessage, errorCode, redirectURL, e);
         }
+    }
+
+    private String getEncoded(String username, String retryParam, UserStoreException e) throws AuthAPIClientException {
+        String encodedUsername;
+        try {
+            encodedUsername = URLEncoder.encode(username, "UTF-8");
+        } catch (UnsupportedEncodingException e1) {
+            throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_UNEXPECTED.getMessage(), AuthAPIConstants
+                    .Error.ERROR_UNEXPECTED.getCode(), null, e);
+        }
+        return encodedUsername;
     }
 
     public String getUserStoreDomain(String username) {
@@ -155,6 +253,28 @@ public class AuthManagerImpl implements AuthManager {
         }
 
         return UserCoreUtil.extractDomainFromName(username);
+    }
+
+    private boolean isShowAuthFailureReason(){
+        Map<String, String> parameterMap = getAuthenticatorConfig().getParameterMap();
+        String showAuthFailureReason = null;
+        if (parameterMap != null) {
+            showAuthFailureReason = parameterMap.get(FrameworkConstants.SHOW_AUTHFAILURE_RESON_CONFIG);
+            if (log.isDebugEnabled()) {
+                log.debug("showAuthFailureReason has been set as : " + showAuthFailureReason);
+            }
+        }
+        return showAuthFailureReason != null && "true".equals(showAuthFailureReason);
+    }
+
+    private AuthenticatorConfig getAuthenticatorConfig() {
+        AuthenticatorConfig authConfig = FileBasedConfigurationBuilder.getInstance().getAuthenticatorBean
+                (FrameworkConstants.BASIC_AUTHENTICATOR_CLASS);
+        if (authConfig == null) {
+            authConfig = new AuthenticatorConfig();
+            authConfig.setParameterMap(new HashMap());
+        }
+        return authConfig;
     }
 
 }

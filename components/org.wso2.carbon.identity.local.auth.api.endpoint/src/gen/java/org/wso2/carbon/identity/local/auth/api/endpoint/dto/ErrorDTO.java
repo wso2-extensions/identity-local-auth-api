@@ -4,11 +4,6 @@ package org.wso2.carbon.identity.local.auth.api.endpoint.dto;
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
 
-import javax.validation.constraints.NotNull;
-
-
-
-
 
 @ApiModel(description = "")
 public class ErrorDTO  {
@@ -22,6 +17,7 @@ public class ErrorDTO  {
   
   
   private String description = null;
+  private String redirectURL = null;
 
   
   /**
@@ -59,6 +55,17 @@ public class ErrorDTO  {
     this.description = description;
   }
 
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("redirectURL")
+  public String getRedirectURL() {
+    return redirectURL;
+  }
+  public void setRedirectURL(String description) {
+    this.redirectURL = description;
+  }
+
   
 
   @Override
@@ -69,6 +76,7 @@ public class ErrorDTO  {
     sb.append("  code: ").append(code).append("\n");
     sb.append("  message: ").append(message).append("\n");
     sb.append("  description: ").append(description).append("\n");
+    sb.append("  redirectURL: ").append(redirectURL).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

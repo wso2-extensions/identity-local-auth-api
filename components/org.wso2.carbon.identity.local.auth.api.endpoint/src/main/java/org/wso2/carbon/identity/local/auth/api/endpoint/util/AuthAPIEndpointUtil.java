@@ -29,9 +29,11 @@ public class AuthAPIEndpointUtil {
      * @param code        Error Code.
      * @return BadRequestException with the given errorCode and description.
      */
-    public static BadRequestException buildBadRequestException(String description, String code, Log log, Throwable e) {
+    public static BadRequestException buildBadRequestException(String description, String code,  String retryParams,
+                                                               Log log, Throwable e) {
 
-        ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code);
+        ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code,
+                retryParams);
         logDebug(log, e);
         return new BadRequestException(errorDTO);
     }
@@ -45,17 +47,18 @@ public class AuthAPIEndpointUtil {
     public static InternalServerErrorException buildInternalServerErrorException(String code, Log log, Throwable e) {
 
         ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT,
-                AuthEndpointConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, code);
+                AuthEndpointConstants.STATUS_INTERNAL_SERVER_ERROR_MESSAGE_DEFAULT, code, null);
         logError(log, e);
         return new InternalServerErrorException(errorDTO);
     }
 
-    private static ErrorDTO getErrorDTO(String message, String description, String code) {
+    private static ErrorDTO getErrorDTO(String message, String description, String code, String retryParam) {
 
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(code);
         errorDTO.setMessage(message);
         errorDTO.setDescription(description);
+        errorDTO.setRedirectURL(retryParam);
         return errorDTO;
     }
 
