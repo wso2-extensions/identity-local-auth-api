@@ -62,19 +62,17 @@ public class AuthenticateApiServiceImpl extends AuthenticateApiService {
         AuthnRequest authnRequest = new AuthnRequest();
         authnRequest.setAuthType(AuthAPIConstants.AuthType.VIA_AUTHORIZATION_HEADER.name());
         authnRequest.setParameter(AuthAPIConstants.AUTH_PARAM_AUTHORIZATION_HEADER, authorizationHeader);
-
         return authenticate(authnRequest);
     }
 
     protected AuthenticationSuccessResponseDTO authenticateWithRequestBodyParameters(AuthenticationRequestDTO
-                                                                                           credentials) throws
+                                                                                             credentials) throws
             AuthAPIException {
 
         AuthnRequest authnRequest = new AuthnRequest();
         authnRequest.setAuthType(AuthAPIConstants.AuthType.VIA_REQUEST_BODY.name());
         authnRequest.setParameter(AuthAPIConstants.AUTH_PARAM_USERNAME, credentials.getUsername());
         authnRequest.setParameter(AuthAPIConstants.AUTH_PARAM_PASSWORD, credentials.getPassword());
-
         return authenticate(authnRequest);
     }
 
@@ -94,7 +92,8 @@ public class AuthenticateApiServiceImpl extends AuthenticateApiService {
 
     private Response handleBadRequestResponse(AuthAPIClientException e) {
 
-        throw AuthAPIEndpointUtil.buildBadRequestException(e.getMessage(), e.getErrorCode(), log, e);
+        throw AuthAPIEndpointUtil.buildBadRequestException(e.getMessage(), e.getErrorCode(), e.getProperties(),
+                log, e);
     }
 
     private Response handleServerErrorResponse(AuthAPIException e) {

@@ -1,5 +1,8 @@
 package org.wso2.carbon.identity.local.auth.api.endpoint.dto;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -22,6 +25,9 @@ public class ErrorDTO  {
   
   
   private String description = null;
+  
+  
+  private Map<String, String> properties = new HashMap<String, String>();
 
   
   /**
@@ -60,6 +66,18 @@ public class ErrorDTO  {
   }
 
   
+  /**
+   **/
+  @ApiModelProperty(value = "")
+  @JsonProperty("properties")
+  public Map<String, String> getProperties() {
+    return properties;
+  }
+  public void setProperties(Map<String, String> properties) {
+    this.properties = properties;
+  }
+
+  
 
   @Override
   public String toString()  {
@@ -69,6 +87,7 @@ public class ErrorDTO  {
     sb.append("  code: ").append(code).append("\n");
     sb.append("  message: ").append(message).append("\n");
     sb.append("  description: ").append(description).append("\n");
+    sb.append("  properties: ").append(properties).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
