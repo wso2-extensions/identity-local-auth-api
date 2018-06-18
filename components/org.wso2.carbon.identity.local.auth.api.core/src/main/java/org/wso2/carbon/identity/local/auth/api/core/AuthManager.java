@@ -11,5 +11,4 @@ public interface AuthManager {
 
     public void generateAuthnToken(AuthnMessageContext context) throws AuthAPIException;
 
-
 }

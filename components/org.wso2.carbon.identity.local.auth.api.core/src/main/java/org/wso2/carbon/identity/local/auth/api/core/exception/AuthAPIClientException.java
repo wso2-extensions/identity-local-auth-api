@@ -16,6 +16,7 @@
 
 package org.wso2.carbon.identity.local.auth.api.core.exception;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,11 +25,7 @@ import java.util.Map;
  */
 public class AuthAPIClientException extends AuthAPIException {
 
-    private HashMap<String,String> properties;
-
-    public HashMap<String,String> getRedirectURL() {
-        return properties;
-    }
+    private Map<String, String> properties;
 
     public AuthAPIClientException() {
 
@@ -56,11 +53,15 @@ public class AuthAPIClientException extends AuthAPIException {
         super(cause);
     }
 
-    public HashMap<String,String> getProperties() {
-        return properties;
+    public Map<String, String> getProperties() {
+
+        if (properties != null) {
+            return Collections.unmodifiableMap(properties);
+        }
+        return null;
     }
 
-    public void setProperties(HashMap<String,String> properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
     }
 }

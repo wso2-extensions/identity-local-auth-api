@@ -10,6 +10,7 @@ import org.wso2.carbon.identity.local.auth.api.endpoint.exception.BadRequestExce
 import org.wso2.carbon.identity.local.auth.api.endpoint.exception.InternalServerErrorException;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class AuthAPIEndpointUtil {
 
@@ -31,7 +32,7 @@ public class AuthAPIEndpointUtil {
      * @param code        Error Code.
      * @return BadRequestException with the given errorCode and description.
      */
-    public static BadRequestException buildBadRequestException(String description, String code,  HashMap<String,String> properties,
+    public static BadRequestException buildBadRequestException(String description, String code,  Map<String,String> properties,
                                                                Log log, Throwable e) {
 
         ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code,
@@ -54,7 +55,7 @@ public class AuthAPIEndpointUtil {
         return new InternalServerErrorException(errorDTO);
     }
 
-    private static ErrorDTO getErrorDTO(String message, String description, String code, HashMap<String,String>
+    private static ErrorDTO getErrorDTO(String message, String description, String code, Map<String,String>
             properties) {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(code);

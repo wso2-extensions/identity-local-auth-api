@@ -32,8 +32,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.wso2.carbon.identity.local.auth.api.core.constants.AuthAPIConstants.AUTH_FAILURE_MSG;
-
 public class AuthManagerImpl implements AuthManager {
 
     private static final Log log = LogFactory.getLog(AuthManagerImpl.class);
@@ -158,7 +156,9 @@ public class AuthManagerImpl implements AuthManager {
             HashMap<String, String> errorProperties = new HashMap<>();
             IdentityErrorMsgContext errorContext = IdentityUtil.getIdentityErrorMsg();
             IdentityUtil.clearIdentityErrorMsg();
-            errorProperties.put(AUTH_FAILURE_MSG, "login.fail.message");
+            errorProperties.put(AuthAPIConstants.AUTH_FAILURE, "true");
+            errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
+            errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
             errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
 
             if (errorContext != null && errorContext.getErrorCode() != null) {
@@ -172,7 +172,7 @@ public class AuthManagerImpl implements AuthManager {
                 errorCode = errorContext.getErrorCode();
                 if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_NOT_CONFIRMED_ERROR_CODE)) {
                     errorMessage = "User Account is not yet confirmed.";
-                    errorProperties.put(AUTH_FAILURE_MSG, "account.confirmation.pending");
+                    errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "account.confirmation.pending");
                     Object domain = IdentityUtil.threadLocalProperties.get().get(RE_CAPTCHA_USER_DOMAIN);
                     if (domain != null) {
                         username = IdentityUtil.addDomainToName(username, domain.toString());
@@ -182,12 +182,12 @@ public class AuthManagerImpl implements AuthManager {
                         .ADMIN_FORCED_USER_PASSWORD_RESET_VIA_EMAIL_LINK_ERROR_CODE)) {
                     errorMessage = "Password reset is required. A password reset link has been sent to your " +
                             "registered email address.";
-                    errorProperties.put(AUTH_FAILURE_MSG, "password.reset.pending");
+                    errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "password.reset.pending");
                 } else if (errorCode.equals(
                         IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_ERROR_CODE)) {
                     errorMessage = "Password reset is required. Redirect to password reset page.";
                     String tenantDomain = MultitenantUtils.getTenantDomain(username);
-                    errorProperties.put(AUTH_FAILURE_MSG, "password.reset.pending");
+                    errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "password.reset.pending");
                     errorProperties.put(AuthAPIConstants.TENANT_DOMAIN_PARAM, tenantDomain);
                     errorProperties.put(AuthAPIConstants.CONFIRMATION_PARAM, credential.toString());
                 } else if (isShowAuthFailureReason()) {
