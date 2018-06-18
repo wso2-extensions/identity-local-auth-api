@@ -209,7 +209,11 @@
                 <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>com.thetransactioncompany.wso2</groupId>
+                <artifactId>cors-filter</artifactId>
+                <version>${cors.filter.version}</version>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -298,6 +302,7 @@
         <spring-web.version>4.1.6.RELEASE</spring-web.version>
         <swagger-jaxrs.version>1.5.2</swagger-jaxrs.version>
         <junit.version>4.12</junit.version>
+        <cors.filter.version>1.7.0.wso2v1</cors.filter.version>
     </properties>
 
 
