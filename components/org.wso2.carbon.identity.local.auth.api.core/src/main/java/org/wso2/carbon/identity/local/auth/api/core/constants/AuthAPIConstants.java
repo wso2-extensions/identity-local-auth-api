@@ -11,6 +11,18 @@ public class AuthAPIConstants {
     public static final String JWT_TOKEN_TYPE = "JWT";
     public static final String JWT_CLAIM_NONCE = "nonce";
 
+    public static final String USER_NAME = "username";
+    public static final String PASSWORD = "password";
+    public static final String FAILED_USERNAME = "failedUsername";
+    public static final String ERROR_CODE = "errorCode=";
+    public static final String UTF_8 = "UTF-8";
+    public static final String CONFIRMATION_PARAM = "confirmation";
+    public static final String AUTH_FAILURE_MSG = "authFailureMsg";
+    public static final String TENANT_DOMAIN_PARAM = "tenantdomain";
+    public static final String REMAINING_ATTEMPTS = "remainingAttempts";
+    public static final String LOCKED_REASON = "lockedReason";
+
+
     public enum Error {
 
         ERROR_INVALID_USER("18003", "Username cannot be empty."),

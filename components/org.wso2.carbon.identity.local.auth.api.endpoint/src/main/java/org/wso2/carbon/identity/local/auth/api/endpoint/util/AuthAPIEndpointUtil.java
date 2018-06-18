@@ -9,6 +9,8 @@ import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.local.auth.api.endpoint.exception.BadRequestException;
 import org.wso2.carbon.identity.local.auth.api.endpoint.exception.InternalServerErrorException;
 
+import java.util.HashMap;
+
 public class AuthAPIEndpointUtil {
 
     private static final Log log = LogFactory.getLog(AuthAPIEndpointUtil.class);
@@ -29,11 +31,11 @@ public class AuthAPIEndpointUtil {
      * @param code        Error Code.
      * @return BadRequestException with the given errorCode and description.
      */
-    public static BadRequestException buildBadRequestException(String description, String code,  String retryParams,
+    public static BadRequestException buildBadRequestException(String description, String code,  HashMap<String,String> properties,
                                                                Log log, Throwable e) {
 
         ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code,
-                retryParams);
+                properties);
         logDebug(log, e);
         return new BadRequestException(errorDTO);
     }
@@ -52,13 +54,13 @@ public class AuthAPIEndpointUtil {
         return new InternalServerErrorException(errorDTO);
     }
 
-    private static ErrorDTO getErrorDTO(String message, String description, String code, String retryParam) {
-
+    private static ErrorDTO getErrorDTO(String message, String description, String code, HashMap<String,String>
+            properties) {
         ErrorDTO errorDTO = new ErrorDTO();
         errorDTO.setCode(code);
         errorDTO.setMessage(message);
         errorDTO.setDescription(description);
-        errorDTO.setRedirectURL(retryParam);
+        errorDTO.setProperties(properties);
         return errorDTO;
     }
 

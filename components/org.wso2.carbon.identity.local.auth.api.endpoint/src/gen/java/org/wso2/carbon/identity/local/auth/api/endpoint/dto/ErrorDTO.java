@@ -1,8 +1,16 @@
 package org.wso2.carbon.identity.local.auth.api.endpoint.dto;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
+
+import javax.validation.constraints.NotNull;
+
+
+
 
 
 @ApiModel(description = "")
@@ -17,7 +25,9 @@ public class ErrorDTO  {
   
   
   private String description = null;
-  private String redirectURL = null;
+  
+  
+  private Map<String, String> properties = new HashMap<String, String>();
 
   
   /**
@@ -55,15 +65,16 @@ public class ErrorDTO  {
     this.description = description;
   }
 
+  
   /**
    **/
   @ApiModelProperty(value = "")
-  @JsonProperty("redirectURL")
-  public String getRedirectURL() {
-    return redirectURL;
+  @JsonProperty("properties")
+  public Map<String, String> getProperties() {
+    return properties;
   }
-  public void setRedirectURL(String description) {
-    this.redirectURL = description;
+  public void setProperties(Map<String, String> properties) {
+    this.properties = properties;
   }
 
   
@@ -76,7 +87,7 @@ public class ErrorDTO  {
     sb.append("  code: ").append(code).append("\n");
     sb.append("  message: ").append(message).append("\n");
     sb.append("  description: ").append(description).append("\n");
-    sb.append("  redirectURL: ").append(redirectURL).append("\n");
+    sb.append("  properties: ").append(properties).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

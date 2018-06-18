@@ -11,16 +11,14 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-@JsonIgnoreProperties
 public class AuthenticationRequestDTO  {
   
   
   
   private String username = null;
-
+  
+  
   private String password = null;
-
-  private  String sessionDataKey = null;
 
   
   /**
@@ -46,17 +44,6 @@ public class AuthenticationRequestDTO  {
     this.password = password;
   }
 
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("sessionDataKey")
-  public String getSessionDataKey() {
-    return sessionDataKey;
-  }
-  public void setSessionDataKey(String sessionDataKey) {
-    this.sessionDataKey = sessionDataKey;
-  }
-
   
 
   @Override
@@ -66,7 +53,6 @@ public class AuthenticationRequestDTO  {
     
     sb.append("  username: ").append(username).append("\n");
     sb.append("  password: ").append(password).append("\n");
-    sb.append("  sessionDataKey: ").append(sessionDataKey).append("\n");
     sb.append("}\n");
     return sb.toString();
   }

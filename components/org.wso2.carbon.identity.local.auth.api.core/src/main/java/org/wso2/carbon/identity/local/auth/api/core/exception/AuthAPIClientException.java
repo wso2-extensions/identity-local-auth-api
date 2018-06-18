@@ -16,19 +16,18 @@
 
 package org.wso2.carbon.identity.local.auth.api.core.exception;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This class is used to define the client side errors which needs to be handled.
  */
 public class AuthAPIClientException extends AuthAPIException {
 
-    public void setRedirectURL(String redirectURL) {
-        this.redirectURL = redirectURL;
-    }
+    private HashMap<String,String> properties;
 
-    private String redirectURL;
-
-    public String getRedirectURL() {
-        return redirectURL;
+    public HashMap<String,String> getRedirectURL() {
+        return properties;
     }
 
     public AuthAPIClientException() {
@@ -40,16 +39,16 @@ public class AuthAPIClientException extends AuthAPIException {
         super(message, errorCode);
     }
 
-    public AuthAPIClientException(String message, String errorCode, String retryParams) {
+    public AuthAPIClientException(String message, String errorCode, HashMap<String,String> properties) {
 
         super(message, errorCode);
-        this.redirectURL = retryParams;
+        this.properties = properties;
     }
 
-    public AuthAPIClientException(String message, String errorCode, String retryParams, Throwable cause) {
+    public AuthAPIClientException(String message, String errorCode, HashMap<String,String> properties, Throwable cause) {
 
         super(message, errorCode, cause);
-        this.redirectURL = retryParams;
+        this.properties = properties;
     }
 
     public AuthAPIClientException(Throwable cause) {
@@ -57,4 +56,11 @@ public class AuthAPIClientException extends AuthAPIException {
         super(cause);
     }
 
+    public HashMap<String,String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(HashMap<String,String> properties) {
+        this.properties = properties;
+    }
 }

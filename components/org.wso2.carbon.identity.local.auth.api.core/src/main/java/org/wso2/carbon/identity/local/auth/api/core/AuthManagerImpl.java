@@ -4,10 +4,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.application.authentication.framework.config.ConfigurationFacade;
 import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
 import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
-import org.wso2.carbon.identity.application.authentication.framework.context.AuthenticationContext;
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.model.IdentityErrorMsgContext;
@@ -30,19 +28,17 @@ import org.wso2.carbon.user.core.service.RealmService;
 import org.wso2.carbon.user.core.util.UserCoreUtil;
 import org.wso2.carbon.utils.multitenancy.MultitenantUtils;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.wso2.carbon.identity.local.auth.api.core.constants.AuthAPIConstants.AUTH_FAILURE_MSG;
 
 public class AuthManagerImpl implements AuthManager {
 
     private static final Log log = LogFactory.getLog(AuthManagerImpl.class);
     protected AuthTokenGenerator authTokenGenerator;
     private static String RE_CAPTCHA_USER_DOMAIN = "user-domain-recaptcha";
-    private static String BACK_CHANNEL_AUTHENTICATOR_NAME = "BackchannelBasicAuthenticator";
-
 
     public AuthManagerImpl(AuthTokenGenerator authTokenGenerator) {
         this.authTokenGenerator = authTokenGenerator;
@@ -52,7 +48,6 @@ public class AuthManagerImpl implements AuthManager {
     public AuthnResponse authenticate(AuthnRequest request) throws AuthAPIException {
 
         AuthnMessageContext authnMessageContext = new AuthnMessageContext();
-        authnMessageContext.setAuthnContext((AuthenticationContext) request.getParameter(AuthAPIConstants.AUTH_CONTEXT));
         if (AuthAPIConstants.AuthType.VIA_AUTHORIZATION_HEADER.name().equals(request.getAuthType())) {
 
             authenticate(String.valueOf(request.getParameter(AuthAPIConstants.AUTH_PARAM_AUTHORIZATION_HEADER)),
@@ -121,7 +116,7 @@ public class AuthManagerImpl implements AuthManager {
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
         UserStoreManager userStoreManager = getUserStoreManager(userTenantDomain);
 
-        if (authenticate(tenantAwareUsername, credential, userStoreManager, authnMessageContext.getAuthnContext())) {
+        if (authenticate(tenantAwareUsername, credential, userStoreManager)) {
             User user = new User();
             user.setUserName(tenantAwareUsername);
             user.setTenantDomain(userTenantDomain);
@@ -152,8 +147,7 @@ public class AuthManagerImpl implements AuthManager {
         }
     }
 
-    private boolean authenticate(String username, Object credential, UserStoreManager userStoreManager,
-                                 AuthenticationContext context) throws
+    private boolean authenticate(String username, Object credential, UserStoreManager userStoreManager) throws
             AuthAPIClientException {
 
         try {
@@ -161,17 +155,53 @@ public class AuthManagerImpl implements AuthManager {
         } catch (UserStoreException e) {
             String errorMessage = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage();
             String errorCode = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode();
+            HashMap<String, String> errorProperties = new HashMap<>();
             IdentityErrorMsgContext errorContext = IdentityUtil.getIdentityErrorMsg();
             IdentityUtil.clearIdentityErrorMsg();
-            String retryParam = "&authFailure=true&authFailureMsg=login.fail.message";
-            String encodedUsername = getEncoded(username, retryParam, e);
-            String loginPage = ConfigurationFacade.getInstance().getAuthenticationEndpointURL();
+            errorProperties.put(AUTH_FAILURE_MSG, "login.fail.message");
+            errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
 
-            String redirectURL;
-            if (isShowAuthFailureReason()) {
-                if (errorContext != null) {
-                    errorCode = errorContext.getErrorCode();
-                    int remainingAttempts = errorContext.getMaximumLoginAttempts() - errorContext.getFailedLoginAttempts();
+            if (errorContext != null && errorContext.getErrorCode() != null) {
+                if (log.isDebugEnabled()) {
+                    StringBuilder debugString = new StringBuilder();
+                    debugString.append("Identity error message context is not null. Error details are as follows.");
+                    debugString.append("errorCode : " + errorCode + "\n");
+                    debugString.append("username : " + username + "\n");
+                    log.debug(debugString.toString());
+                }
+                errorCode = errorContext.getErrorCode();
+                if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_NOT_CONFIRMED_ERROR_CODE)) {
+                    errorMessage = "User Account is not yet confirmed.";
+                    errorProperties.put(AUTH_FAILURE_MSG, "account.confirmation.pending");
+                    Object domain = IdentityUtil.threadLocalProperties.get().get(RE_CAPTCHA_USER_DOMAIN);
+                    if (domain != null) {
+                        username = IdentityUtil.addDomainToName(username, domain.toString());
+                        errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
+                    }
+                } else if (errorCode.equals(IdentityCoreConstants
+                        .ADMIN_FORCED_USER_PASSWORD_RESET_VIA_EMAIL_LINK_ERROR_CODE)) {
+                    errorMessage = "Password reset is required. A password reset link has been sent to your " +
+                            "registered email address.";
+                    errorProperties.put(AUTH_FAILURE_MSG, "password.reset.pending");
+                } else if (errorCode.equals(
+                        IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_ERROR_CODE)) {
+                    errorMessage = "Password reset is required. Redirect to password reset page.";
+                    String tenantDomain = MultitenantUtils.getTenantDomain(username);
+                    errorProperties.put(AUTH_FAILURE_MSG, "password.reset.pending");
+                    errorProperties.put(AuthAPIConstants.TENANT_DOMAIN_PARAM, tenantDomain);
+                    errorProperties.put(AuthAPIConstants.CONFIRMATION_PARAM, credential.toString());
+                } else if (isShowAuthFailureReason()) {
+
+                    String reason = null;
+                    if (errorCode.contains(":")) {
+                        String[] errorCodeReason = errorCode.split(":");
+                        errorCode = errorCodeReason[0];
+                        if (errorCodeReason.length > 1) {
+                            reason = errorCodeReason[1];
+                        }
+                    }
+                    int remainingAttempts = errorContext.getMaximumLoginAttempts() - errorContext
+                            .getFailedLoginAttempts();
 
                     if (log.isDebugEnabled()) {
                         StringBuilder debugString = new StringBuilder();
@@ -181,67 +211,46 @@ public class AuthManagerImpl implements AuthManager {
                         debugString.append("remainingAttempts : " + remainingAttempts);
                         log.debug(debugString.toString());
                     }
-
                     if (errorCode.equals(UserCoreConstants.ErrorCode.INVALID_CREDENTIAL)) {
-                        retryParam = retryParam + "&errorCode=" + errorCode + "&failedUsername=" + encodedUsername +
-                                "&remainingAttempts=" + remainingAttempts;
-                        redirectURL = loginPage + ("?" + context.getContextIdIncludedQueryParams())
-                                + "&authenticators=BackchannelBasicAuthenticator:" + FrameworkConstants.LOCAL + retryParam;
+                        errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString(remainingAttempts));
                     } else if (errorCode.equals(UserCoreConstants.ErrorCode.USER_IS_LOCKED)) {
+                        errorMessage = "User Account is Locked.";
                         if (remainingAttempts == 0) {
-                            redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
-                                    "&errorCode=" + errorCode + "&failedUsername=" + encodedUsername +
-                                    "&remainingAttempts=0" + "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" +
-                                    FrameworkConstants.LOCAL + retryParam;
+                            if (StringUtils.isBlank(reason)) {
+                                errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, "0");
+                            } else {
+                                errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString
+                                        (remainingAttempts));
+                                errorProperties.put(AuthAPIConstants.LOCKED_REASON, reason);
+                                errorMessage = errorMessage + reason;
+                            }
                         } else {
-                            redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() + "&errorCode=" + errorCode + "&failedUsername="
-                                    + encodedUsername + "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" +
-                                    FrameworkConstants.LOCAL + retryParam;
+                            if (!StringUtils.isBlank(reason)) {
+                                errorProperties.put(AuthAPIConstants.LOCKED_REASON, reason);
+                                errorMessage = errorMessage + reason;
+                            }
                         }
-                    } else if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_NOT_CONFIRMED_ERROR_CODE)) {
-                        retryParam = "&authFailure=true&authFailureMsg=account.confirmation.pending";
-                        Object domain = IdentityUtil.threadLocalProperties.get().get(RE_CAPTCHA_USER_DOMAIN);
-                        if (domain != null) {
-                            username = IdentityUtil.addDomainToName(username, domain.toString());
-                            encodedUsername = getEncoded(username, retryParam, e);
-                        }
-
-                        retryParam = retryParam + "&errorCode=" + errorCode + "&failedUsername=" + encodedUsername;
-                        redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
-                                "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants.LOCAL + retryParam;
-                    } else {
-                        retryParam = retryParam + "&errorCode=" + errorCode + "&failedUsername=" + encodedUsername;
-                        redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
-                                "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants.LOCAL + retryParam;
+                    } else if (errorCode.equals(UserCoreConstants.ErrorCode.USER_DOES_NOT_EXIST)) {
+                            errorMessage = "User Account Does not exists";
+                    } else if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_DISABLED_ERROR_CODE)) {
+                        errorMessage = "User Account is Disabled.";
+                    } else if (errorCode.equals(
+                            IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_MISMATCHED_ERROR_CODE)) {
+                        errorMessage = "Password Reset is required.";
+                        errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
                     }
                 } else {
-                    redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
-                            "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants.LOCAL + retryParam;
+                    if (log.isDebugEnabled()) {
+                        log.debug("Unknown identity error code.");
+                    }
                 }
             } else {
-                errorCode = errorContext != null ? errorContext.getErrorCode() : null;
-                if (errorCode != null && errorCode.equals(UserCoreConstants.ErrorCode.USER_IS_LOCKED)) {
-                    redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() + "&failedUsername=" +
-                            encodedUsername + "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants
-                            .LOCAL + retryParam;
-                } else {
-                    redirectURL = loginPage + "?" + context.getContextIdIncludedQueryParams() +
-                            "&authenticators=" + BACK_CHANNEL_AUTHENTICATOR_NAME + ":" + FrameworkConstants.LOCAL + retryParam;
+                if (log.isDebugEnabled()) {
+                    log.debug("Identity error message context is null");
                 }
             }
-            throw new AuthAPIClientException(errorMessage, errorCode, redirectURL, e);
+            throw new AuthAPIClientException(errorMessage, errorCode, errorProperties, e);
         }
-    }
-
-    private String getEncoded(String username, String retryParam, UserStoreException e) throws AuthAPIClientException {
-        String encodedUsername;
-        try {
-            encodedUsername = URLEncoder.encode(username, "UTF-8");
-        } catch (UnsupportedEncodingException e1) {
-            throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_UNEXPECTED.getMessage(), AuthAPIConstants
-                    .Error.ERROR_UNEXPECTED.getCode(), null, e);
-        }
-        return encodedUsername;
     }
 
     public String getUserStoreDomain(String username) {
