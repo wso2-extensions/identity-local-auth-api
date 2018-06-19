@@ -1,7 +1,6 @@
 package org.wso2.carbon.identity.local.auth.api.endpoint.util;
 
 import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.local.auth.api.core.AuthManager;
 import org.wso2.carbon.identity.local.auth.api.endpoint.constant.AuthEndpointConstants;
@@ -9,12 +8,9 @@ import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.local.auth.api.endpoint.exception.BadRequestException;
 import org.wso2.carbon.identity.local.auth.api.endpoint.exception.InternalServerErrorException;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class AuthAPIEndpointUtil {
-
-    private static final Log log = LogFactory.getLog(AuthAPIEndpointUtil.class);
 
     private AuthAPIEndpointUtil() {
     }
