@@ -104,6 +104,7 @@
                             !org.wso2.carbon.identity.local.auth.api.core.internal,
                             org.wso2.carbon.identity.local.auth.api.core.*; version="${project.version}",
                         </Export-Package>
+                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
