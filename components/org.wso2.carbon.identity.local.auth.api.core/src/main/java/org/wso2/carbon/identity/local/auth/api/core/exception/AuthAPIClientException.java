@@ -25,11 +25,16 @@ import java.util.Map;
  */
 public class AuthAPIClientException extends AuthAPIException {
 
+    private ErrorType errorType;
+
     private Map<String, String> properties;
 
-    public AuthAPIClientException() {
+    public AuthAPIClientException(String message, String errorCode, ErrorType errorType) {
 
+        super(message, errorCode);
+        this.errorType = errorType;
     }
+
 
     public AuthAPIClientException(String message, String errorCode) {
 
@@ -42,9 +47,25 @@ public class AuthAPIClientException extends AuthAPIException {
         this.properties = properties;
     }
 
+    public AuthAPIClientException(String message, String errorCode, ErrorType errorType, HashMap<String, String>
+            properties) {
+
+        super(message, errorCode);
+        this.errorType = errorType;
+        this.properties = properties;
+    }
+
     public AuthAPIClientException(String message, String errorCode, HashMap<String,String> properties, Throwable cause) {
 
         super(message, errorCode, cause);
+        this.properties = properties;
+    }
+
+    public AuthAPIClientException(String message, String errorCode, ErrorType errorType, HashMap<String, String>
+            properties, Throwable cause) {
+
+        super(message, errorCode, cause);
+        this.errorType = errorType;
         this.properties = properties;
     }
 
@@ -63,5 +84,13 @@ public class AuthAPIClientException extends AuthAPIException {
 
     public void setProperties(Map<String, String> properties) {
         this.properties = properties;
+    }
+
+    public ErrorType getErrorType() {
+        return errorType;
+    }
+
+    public enum ErrorType {
+        BAD_REQUEST, NOT_ACCEPTABLE, NOT_FOUND, CONFLICT, UNAUTHORIZED;
     }
 }

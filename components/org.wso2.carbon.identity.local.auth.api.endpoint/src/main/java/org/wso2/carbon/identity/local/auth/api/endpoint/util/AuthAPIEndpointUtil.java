@@ -3,13 +3,20 @@ package org.wso2.carbon.identity.local.auth.api.endpoint.util;
 import org.apache.commons.logging.Log;
 import org.wso2.carbon.context.PrivilegedCarbonContext;
 import org.wso2.carbon.identity.local.auth.api.core.AuthManager;
+import org.wso2.carbon.identity.local.auth.api.core.exception.AuthAPIClientException;
 import org.wso2.carbon.identity.local.auth.api.endpoint.constant.AuthEndpointConstants;
 import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ErrorDTO;
 import org.wso2.carbon.identity.local.auth.api.endpoint.exception.BadRequestException;
+import org.wso2.carbon.identity.local.auth.api.endpoint.exception.ClientErrorException;
 import org.wso2.carbon.identity.local.auth.api.endpoint.exception.InternalServerErrorException;
+import org.wso2.carbon.identity.local.auth.api.endpoint.exception.NotAcceptableException;
+import org.wso2.carbon.identity.local.auth.api.endpoint.exception.NotFoundException;
 
 import java.util.Map;
 
+/**
+ * This class includes utility methods.
+ */
 public class AuthAPIEndpointUtil {
 
     private AuthAPIEndpointUtil() {
@@ -22,10 +29,39 @@ public class AuthAPIEndpointUtil {
     }
 
     /**
+     * This method is used to create a client exceptions with the known errorCode and message based on error type.
+     *
+     * @param description Error message description
+     * @param code        Error code
+     * @param errorType   Error type
+     * @param properties  Additional properties
+     * @param log         Logger
+     * @param e           Exception object
+     * @return ClientErrorException with the given errorCode and description.
+     */
+    public static ClientErrorException buildClientErrorException(String description, String code,
+                                                                 AuthAPIClientException.ErrorType errorType,
+                                                                 Map<String, String> properties, Log log, Throwable e) {
+
+        if (AuthAPIClientException.ErrorType.BAD_REQUEST.equals(errorType)) {
+            return buildBadRequestException(description, code, properties, log, e);
+        } else if (AuthAPIClientException.ErrorType.NOT_ACCEPTABLE.equals(errorType)) {
+            return buildNotAcceptableException(description, code, properties, log, e);
+        } else if (AuthAPIClientException.ErrorType.NOT_FOUND.equals(errorType)) {
+            return buildNotFoundException(description, code, properties, log, e);
+        }
+
+        return buildBadRequestException(description, code, properties, log, e);
+    }
+
+    /**
      * This method is used to create a BadRequestException with the known errorCode and message.
      *
-     * @param description Error Message Desription.
-     * @param code        Error Code.
+     * @param description Error message description.
+     * @param code        Error code.
+     * @param properties Additional properties
+     * @param log Logger
+     * @param e Exception object
      * @return BadRequestException with the given errorCode and description.
      */
     public static BadRequestException buildBadRequestException(String description, String code,  Map<String,String> properties,
@@ -35,6 +71,44 @@ public class AuthAPIEndpointUtil {
                 properties);
         logDebug(log, e);
         return new BadRequestException(errorDTO);
+    }
+
+    /**
+     * This method is used to create a NotAcceptableException with the known errorCode and message.
+     *
+     * @param description Error message description.
+     * @param code        Error code.
+     * @param properties  Additional properties
+     * @param log         Logger
+     * @param e           Exception object
+     * @return BadRequestException with the given errorCode and description.
+     */
+    public static NotAcceptableException buildNotAcceptableException(String description, String code, Map<String,
+            String> properties, Log log, Throwable e) {
+
+        ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_NOT_ACCEPTABLE_MESSAGE_DEFAULT, description,
+                code, properties);
+        logDebug(log, e);
+        return new NotAcceptableException(errorDTO);
+    }
+
+    /**
+     * This method is used to create a NotFoundException with the known errorCode and message.
+     *
+     * @param description Error message description.
+     * @param code        Error code.
+     * @param properties  Additional properties
+     * @param log         Logger
+     * @param e           Exception object
+     * @return NotFoundException with the given errorCode and description.
+     */
+    public static NotFoundException buildNotFoundException(String description, String code, Map<String, String>
+            properties, Log log, Throwable e) {
+
+        ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, description, code,
+                properties);
+        logDebug(log, e);
+        return new NotFoundException(errorDTO);
     }
 
     /**

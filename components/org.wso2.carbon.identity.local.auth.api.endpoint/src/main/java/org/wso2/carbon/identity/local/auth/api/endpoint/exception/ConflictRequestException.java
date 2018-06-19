@@ -21,12 +21,9 @@ package org.wso2.carbon.identity.local.auth.api.endpoint.exception;
 import org.wso2.carbon.identity.local.auth.api.endpoint.constant.AuthEndpointConstants;
 import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ErrorDTO;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-public class ConflictRequestException extends WebApplicationException {
-
-    private String message;
+public class ConflictRequestException extends ClientErrorException {
 
     public ConflictRequestException(ErrorDTO errorDTO) {
 
@@ -38,11 +35,5 @@ public class ConflictRequestException extends WebApplicationException {
     public ConflictRequestException() {
 
         super(Response.Status.CONFLICT);
-    }
-
-    @Override
-    public String getMessage() {
-
-        return message;
     }
 }

@@ -21,12 +21,9 @@ package org.wso2.carbon.identity.local.auth.api.endpoint.exception;
 import org.wso2.carbon.identity.local.auth.api.endpoint.constant.AuthEndpointConstants;
 import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ErrorDTO;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-public class NotFoundException extends WebApplicationException {
-
-    private String message;
+public class NotFoundException extends ClientErrorException {
 
     public NotFoundException(ErrorDTO errorDTO) {
 
@@ -38,11 +35,5 @@ public class NotFoundException extends WebApplicationException {
     public NotFoundException() {
 
         super(Response.Status.NOT_FOUND);
-    }
-
-    @Override
-    public String getMessage() {
-
-        return message;
     }
 }

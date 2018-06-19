@@ -21,12 +21,9 @@ package org.wso2.carbon.identity.local.auth.api.endpoint.exception;
 import org.wso2.carbon.identity.local.auth.api.endpoint.constant.AuthEndpointConstants;
 import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ErrorDTO;
 
-import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
 
-public class BadRequestException extends WebApplicationException {
-
-    private String message;
+public class BadRequestException extends ClientErrorException {
 
     public BadRequestException(ErrorDTO errorDTO) {
 
@@ -38,11 +35,5 @@ public class BadRequestException extends WebApplicationException {
     public BadRequestException() {
 
         super(Response.Status.BAD_REQUEST);
-    }
-
-    @Override
-    public String getMessage() {
-
-        return message;
     }
 }

@@ -91,12 +91,14 @@ public class AuthManagerImpl implements AuthManager {
                 } else {
                     authnMessageContext.setAuthnStatus(AuthnStatus.ERROR);
                     throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_AUTHORIZATION_HEADER
-                            .getMessage(), AuthAPIConstants.Error.ERROR_INVALID_AUTHORIZATION_HEADER.getCode());
+                            .getMessage(), AuthAPIConstants.Error.ERROR_INVALID_AUTHORIZATION_HEADER.getCode(),
+                            AuthAPIClientException.ErrorType.BAD_REQUEST);
                 }
             } else {
                 authnMessageContext.setAuthnStatus(AuthnStatus.ERROR);
                 throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_AUTHORIZATION_HEADER.getMessage
-                        (), AuthAPIConstants.Error.ERROR_INVALID_AUTHORIZATION_HEADER.getCode());
+                        (), AuthAPIConstants.Error.ERROR_INVALID_AUTHORIZATION_HEADER.getCode(),
+                        AuthAPIClientException.ErrorType.BAD_REQUEST);
             }
         }
     }
@@ -107,7 +109,7 @@ public class AuthManagerImpl implements AuthManager {
         if (StringUtils.isBlank(username)) {
             authnMessageContext.setAuthnStatus(AuthnStatus.ERROR);
             throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_USER.getMessage(), AuthAPIConstants
-                    .Error.ERROR_INVALID_USER.getCode());
+                    .Error.ERROR_INVALID_USER.getCode(), AuthAPIClientException.ErrorType.BAD_REQUEST);
         }
 
         String userTenantDomain = MultitenantUtils.getTenantDomain(username);
@@ -126,7 +128,8 @@ public class AuthManagerImpl implements AuthManager {
             authnMessageContext.setAuthnStatus(AuthnStatus.FAIL);
             HashMap<String, String> errorProperties = getErrorProperties(username);
             throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage(),
-                    AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode(), errorProperties);
+                    AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode(), AuthAPIClientException.ErrorType
+                    .BAD_REQUEST, errorProperties);
         }
     }
 
@@ -171,6 +174,7 @@ public class AuthManagerImpl implements AuthManager {
         } catch (UserStoreException e) {
             String errorMessage = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage();
             String errorCode = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode();
+            AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.BAD_REQUEST;
             HashMap<String, String> errorProperties = new HashMap<>();
             IdentityErrorMsgContext errorContext = IdentityUtil.getIdentityErrorMsg();
             IdentityUtil.clearIdentityErrorMsg();
@@ -189,6 +193,7 @@ public class AuthManagerImpl implements AuthManager {
                 errorCode = errorContext.getErrorCode();
                 if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_NOT_CONFIRMED_ERROR_CODE)) {
                     errorMessage = "User Account is not yet confirmed.";
+                    errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
                     errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "account.confirmation.pending");
                     Object domain = IdentityUtil.threadLocalProperties.get().get(RE_CAPTCHA_USER_DOMAIN);
                     if (domain != null) {
@@ -199,10 +204,12 @@ public class AuthManagerImpl implements AuthManager {
                         .ADMIN_FORCED_USER_PASSWORD_RESET_VIA_EMAIL_LINK_ERROR_CODE)) {
                     errorMessage = "Password reset is required. A password reset link has been sent to your " +
                             "registered email address.";
+                    errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
                     errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "password.reset.pending");
                 } else if (errorCode.equals(
                         IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_ERROR_CODE)) {
-                    errorMessage = "Password reset is required. Redirect to password reset page.";
+                    errorMessage = "Password reset is required.";
+                    errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
                     String tenantDomain = MultitenantUtils.getTenantDomain(username);
                     errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "password.reset.pending");
                     errorProperties.put(AuthAPIConstants.TENANT_DOMAIN_PARAM, tenantDomain);
@@ -232,6 +239,7 @@ public class AuthManagerImpl implements AuthManager {
                         errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString(remainingAttempts));
                     } else if (errorCode.equals(UserCoreConstants.ErrorCode.USER_IS_LOCKED)) {
                         errorMessage = "User Account is Locked.";
+                        errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
                         if (remainingAttempts == 0) {
                             if (StringUtils.isBlank(reason)) {
                                 errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, "0");
@@ -248,12 +256,15 @@ public class AuthManagerImpl implements AuthManager {
                             }
                         }
                     } else if (errorCode.equals(UserCoreConstants.ErrorCode.USER_DOES_NOT_EXIST)) {
-                            errorMessage = "User Account Does not exists";
+                        errorMessage = "User Account Does not exists";
+                        errorType = AuthAPIClientException.ErrorType.NOT_FOUND;
                     } else if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_DISABLED_ERROR_CODE)) {
                         errorMessage = "User Account is Disabled.";
+                        errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
                     } else if (errorCode.equals(
                             IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_MISMATCHED_ERROR_CODE)) {
                         errorMessage = "Password Reset is required.";
+                        errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
                         errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
                     }
                 } else {
@@ -266,7 +277,7 @@ public class AuthManagerImpl implements AuthManager {
                     log.debug("Identity error message context is null");
                 }
             }
-            throw new AuthAPIClientException(errorMessage, errorCode, errorProperties, e);
+            throw new AuthAPIClientException(errorMessage, errorCode, errorType, errorProperties, e);
         }
     }
 
