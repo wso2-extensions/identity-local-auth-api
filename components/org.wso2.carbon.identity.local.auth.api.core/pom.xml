@@ -91,12 +91,19 @@
                         <Bundle-Name>${project.artifactId}</Bundle-Name>
                         <Private-Package>org.wso2.carbon.identity.local.auth.api.core.internal</Private-Package>
                         <Import-Package>
+                            org.apache.commons.logging; version="${commons-logging.imp.pkg.version}",
+                            org.osgi.service.component; version="${osgi.service.component.imp.pkg.version}",
+                            org.wso2.carbon.user.core.service; version="${carbon.kernel.imp.pkg.version}",
+                            org.wso2.carbon.idp.mgt;version="${carbon.identity.imp.pkg.version}",
+                            org.wso2.carbon.user.api; version="${carbon.user.api.imp.pkg.version}",
+                            com.nimbusds.jose; version="${nimbusds.imp.pkg.version}",
+                            com.nimbusds.jwt; version="${nimbusds.imp.pkg.version}",
+                            org.osgi.framework; version="${osgi.framework.imp.pkg.version}"
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.local.auth.api.core.internal,
                             org.wso2.carbon.identity.local.auth.api.core.*; version="${project.version}",
                         </Export-Package>
-                        <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
                 </configuration>
             </plugin>
