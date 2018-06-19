@@ -124,9 +124,27 @@ public class AuthManagerImpl implements AuthManager {
             authnMessageContext.setAuthnStatus(AuthnStatus.SUCCESS);
         } else {
             authnMessageContext.setAuthnStatus(AuthnStatus.FAIL);
+            HashMap<String, String> errorProperties = getErrorProperties(username);
             throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage(),
-                    AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode());
+                    AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode(), errorProperties);
         }
+    }
+
+    private HashMap<String, String> getErrorProperties(String username) {
+        HashMap<String, String> errorProperties = new HashMap<>();
+        errorProperties.put(AuthAPIConstants.AUTH_FAILURE, "true");
+        errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
+        errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
+
+        IdentityErrorMsgContext errorContext = IdentityUtil.getIdentityErrorMsg();
+        IdentityUtil.clearIdentityErrorMsg();
+        if(errorContext != null){
+            int remainingAttempts = errorContext.getMaximumLoginAttempts() - errorContext
+                    .getFailedLoginAttempts();
+            errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString(remainingAttempts));
+        }
+
+        return errorProperties;
     }
 
     private UserStoreManager getUserStoreManager(String tenantDomain) throws AuthAPIServerException {
@@ -158,7 +176,6 @@ public class AuthManagerImpl implements AuthManager {
             IdentityUtil.clearIdentityErrorMsg();
             errorProperties.put(AuthAPIConstants.AUTH_FAILURE, "true");
             errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
-            errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
             errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
 
             if (errorContext != null && errorContext.getErrorCode() != null) {
