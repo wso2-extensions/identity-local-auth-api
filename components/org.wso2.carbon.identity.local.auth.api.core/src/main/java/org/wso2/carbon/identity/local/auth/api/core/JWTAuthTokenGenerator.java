@@ -101,13 +101,9 @@ public class JWTAuthTokenGenerator implements AuthTokenGenerator {
         long currentTime = Calendar.getInstance().getTimeInMillis();
         long expireIn = currentTime + 1000 * validityPeriod;
 
-        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet();
-        jwtClaimsSet.setIssuer(issuer);
-        jwtClaimsSet.setSubject(authenticatedUser.toString());
-        jwtClaimsSet.setIssueTime(new Date(currentTime));
-        jwtClaimsSet.setExpirationTime(new Date(expireIn));
-        jwtClaimsSet.setJWTID(UUID.randomUUID().toString());
-        jwtClaimsSet.setClaim(AuthAPIConstants.JWT_CLAIM_NONCE, generateNonce());
+        JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder().issuer(issuer).subject(authenticatedUser.toString())
+                .issueTime(new Date(currentTime)).expirationTime(new Date(expireIn)).jwtID(UUID.randomUUID().toString
+                        ()).claim(AuthAPIConstants.JWT_CLAIM_NONCE, generateNonce()).build();
 
         return jwtClaimsSet;
     }
