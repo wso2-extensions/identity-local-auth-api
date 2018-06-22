@@ -311,6 +311,7 @@ public class AuthManagerImpl implements AuthManager {
     }
 
     private boolean isShowAuthFailureReason(){
+
         Map<String, String> parameterMap = getAuthenticatorConfig().getParameterMap();
         String showAuthFailureReason = null;
         if (parameterMap != null) {
@@ -323,6 +324,7 @@ public class AuthManagerImpl implements AuthManager {
     }
 
     private AuthenticatorConfig getAuthenticatorConfig() {
+
         AuthenticatorConfig authConfig = FileBasedConfigurationBuilder.getInstance().getAuthenticatorBean
                 (FrameworkConstants.BASIC_AUTHENTICATOR_CLASS);
         if (authConfig == null) {

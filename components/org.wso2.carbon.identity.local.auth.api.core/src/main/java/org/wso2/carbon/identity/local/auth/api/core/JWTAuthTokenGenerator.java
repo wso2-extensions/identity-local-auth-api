@@ -67,8 +67,8 @@ public class JWTAuthTokenGenerator implements AuthTokenGenerator {
     @Override
     public void init() throws AuthAPIException {
 
-        //// TODO: 6/14/18 : Allow configuring JWT token generator, ex: signature algorithms, validity period, issuer,
-        //  etc.
+        // TODO: Allow configuring signing algorithms, encrypting and encryption algorithms, requested claim set as
+        // preferred
     }
 
     @Override

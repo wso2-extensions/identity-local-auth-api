@@ -22,24 +22,50 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * This class represents the authentication request.
+ */
 public class AuthnRequest {
 
     protected String authType;
     protected Map<String, Object> authRequestParameters = new HashMap();
 
+    /**
+     * Returns the authentication mechanism being used which denotes if the authentication happened over HTTP basic
+     * auth mechanism or user credentials in request body.
+     *
+     * @return Authentication mechanism VIA_AUTHORIZATION_HEADER or VIA_REQUEST_BODY
+     */
     public String getAuthType() {
         return authType;
     }
 
+    /**
+     * Sets the authentication mechanism used to initiate the authentication request.
+     *
+     * @param authType Authentication mechanism VIA_AUTHORIZATION_HEADER or VIA_REQUEST_BODY
+     */
     public void setAuthType(String authType) {
         this.authType = authType;
     }
 
+    /**
+     * Sets request parameters.
+     *
+     * @param key   parameter key
+     * @param value parameter value
+     */
     public void setParameter(String key, Object value) {
 
         authRequestParameters.put(key, value);
     }
 
+    /**
+     * Returns the value of the given request parameter.
+     *
+     * @param key parameter key
+     * @return parameter value
+     */
     public Object getParameter(String key) {
         return authRequestParameters.get(key);
     }
