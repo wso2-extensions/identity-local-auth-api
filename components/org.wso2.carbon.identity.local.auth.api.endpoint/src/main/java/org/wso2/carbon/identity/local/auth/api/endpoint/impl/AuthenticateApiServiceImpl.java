@@ -76,6 +76,13 @@ public class AuthenticateApiServiceImpl extends AuthenticateApiService {
         }
     }
 
+    /**
+     * Authenticates with the credentials in authorization header.
+     *
+     * @param authorizationHeader Authorization header value
+     * @return Upon successful authentication return an instance of AuthenticationSuccessResponseDTO
+     * @throws AuthAPIException Thrown when authentication fails or server error occurs
+     */
     protected AuthenticationSuccessResponseDTO authenticateWithAuthorizationHeader(String authorizationHeader) throws
             AuthAPIException {
 
@@ -85,6 +92,13 @@ public class AuthenticateApiServiceImpl extends AuthenticateApiService {
         return authenticate(authnRequest);
     }
 
+    /**
+     * Authenticates with the credentials in the request body.
+     *
+     * @param credentials AuthenticationRequestDTO containing user credentials
+     * @return Upon successful authentication return an instance of AuthenticationSuccessResponseDTO
+     * @throws AuthAPIException Thrown when authentication fails or server error occurs
+     */
     protected AuthenticationSuccessResponseDTO authenticateWithRequestBodyParameters(AuthenticationRequestDTO
                                                                                              credentials) throws
             AuthAPIException {
@@ -96,6 +110,13 @@ public class AuthenticateApiServiceImpl extends AuthenticateApiService {
         return authenticate(authnRequest);
     }
 
+    /**
+     * Authenticates with credentials received from AuthnRequest instance.
+     *
+     * @param authnRequest AuthnRequest instance
+     * @return Upon successful authentication return an instance of AuthenticationSuccessResponseDTO
+     * @throws AuthAPIException Thrown when authentication fails or server error occurs
+     */
     protected AuthenticationSuccessResponseDTO authenticate(AuthnRequest authnRequest) throws AuthAPIException {
 
         AuthnResponse authnResponse = AuthAPIEndpointUtil.getAuthManager().authenticate(authnRequest);

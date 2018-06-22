@@ -37,7 +37,6 @@ public class AuthAPIClientException extends AuthAPIException {
         this.errorType = errorType;
     }
 
-
     public AuthAPIClientException(String message, String errorCode) {
 
         super(message, errorCode);

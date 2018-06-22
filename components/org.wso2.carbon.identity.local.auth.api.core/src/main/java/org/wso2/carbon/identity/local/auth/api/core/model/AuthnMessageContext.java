@@ -79,6 +79,11 @@ public class AuthnMessageContext extends MessageContext<String, Object> implemen
         return authnStatus;
     }
 
+    /**
+     * Sets authentication status
+     *
+     * @param authnStatus Authentication status as SUCCESS, FAIL, ERROR
+     */
     public void setAuthnStatus(AuthnStatus authnStatus) {
         this.authnStatus = authnStatus;
     }
