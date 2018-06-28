@@ -64,7 +64,9 @@ public class AuthenticateApiServiceImpl extends AuthenticateApiService {
                         (credentials);
                 return Response.ok().entity(successResponseDTO).build();
             } else {
-                throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_AUTH_REQUEST.getMessage(), AuthAPIConstants.Error.ERROR_INVALID_AUTH_REQUEST.getCode(), AuthAPIClientException.ErrorType.BAD_REQUEST);
+                throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_AUTH_REQUEST.getMessage(),
+                        AuthAPIConstants.Error.ERROR_INVALID_AUTH_REQUEST.getCode(), AuthAPIClientException.ErrorType
+                        .BAD_REQUEST);
 
             }
         } catch (AuthAPIClientException e) {

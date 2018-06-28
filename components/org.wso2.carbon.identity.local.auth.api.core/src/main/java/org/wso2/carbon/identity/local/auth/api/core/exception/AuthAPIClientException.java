@@ -42,13 +42,13 @@ public class AuthAPIClientException extends AuthAPIException {
         super(message, errorCode);
     }
 
-    public AuthAPIClientException(String message, String errorCode, HashMap<String,String> properties) {
+    public AuthAPIClientException(String message, String errorCode, Map<String,String> properties) {
 
         super(message, errorCode);
         this.properties = properties;
     }
 
-    public AuthAPIClientException(String message, String errorCode, ErrorType errorType, HashMap<String, String>
+    public AuthAPIClientException(String message, String errorCode, ErrorType errorType, Map<String, String>
             properties) {
 
         super(message, errorCode);
@@ -62,7 +62,7 @@ public class AuthAPIClientException extends AuthAPIException {
         this.properties = properties;
     }
 
-    public AuthAPIClientException(String message, String errorCode, ErrorType errorType, HashMap<String, String>
+    public AuthAPIClientException(String message, String errorCode, ErrorType errorType, Map<String, String>
             properties, Throwable cause) {
 
         super(message, errorCode, cause);

@@ -87,7 +87,7 @@ public class AuthAPIEndpointUtil {
 
         ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, description, code,
                 properties);
-        logDebug(log, e);
+        logDebug(AuthEndpointConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, log, e);
         return new BadRequestException(errorDTO);
     }
 
@@ -106,7 +106,7 @@ public class AuthAPIEndpointUtil {
 
         ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_NOT_ACCEPTABLE_MESSAGE_DEFAULT, description,
                 code, properties);
-        logDebug(log, e);
+        logDebug(AuthEndpointConstants.STATUS_NOT_ACCEPTABLE_MESSAGE_DEFAULT, log, e);
         return new NotAcceptableException(errorDTO);
     }
 
@@ -125,7 +125,7 @@ public class AuthAPIEndpointUtil {
 
         ErrorDTO errorDTO = getErrorDTO(AuthEndpointConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, description, code,
                 properties);
-        logDebug(log, e);
+        logDebug(AuthEndpointConstants.STATUS_NOT_FOUND_MESSAGE_DEFAULT, log, e);
         return new NotFoundException(errorDTO);
     }
 
@@ -158,10 +158,10 @@ public class AuthAPIEndpointUtil {
         log.error(throwable.getMessage(), throwable);
     }
 
-    private static void logDebug(Log log, Throwable throwable) {
+    private static void logDebug(String message, Log log, Throwable throwable) {
 
         if (log.isDebugEnabled()) {
-            log.debug(AuthEndpointConstants.STATUS_BAD_REQUEST_MESSAGE_DEFAULT, throwable);
+            log.debug(message, throwable);
         }
     }
 }

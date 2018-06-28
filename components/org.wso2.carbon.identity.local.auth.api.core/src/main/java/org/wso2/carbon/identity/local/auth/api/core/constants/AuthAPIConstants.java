@@ -40,6 +40,9 @@ public class AuthAPIConstants {
     public static final String REMAINING_ATTEMPTS = "remainingAttempts";
     public static final String LOCKED_REASON = "lockedReason";
 
+    public static final String AUTH_TOKEN = "AuthToken";
+    public static final String ERROR_REASON_SEPARATOR = ":";
+
 
     public enum Error {
 
@@ -82,4 +85,7 @@ public class AuthAPIConstants {
         VIA_AUTHORIZATION_HEADER, VIA_REQUEST_BODY;
     }
 
+    private AuthAPIConstants() {
+
+    }
 }
