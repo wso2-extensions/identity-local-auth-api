@@ -22,9 +22,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.identity.application.authentication.framework.config.builder.FileBasedConfigurationBuilder;
-import org.wso2.carbon.identity.application.authentication.framework.config.model.AuthenticatorConfig;
-import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkConstants;
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.model.IdentityErrorMsgContext;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
@@ -81,6 +78,11 @@ public class AuthManagerImpl implements AuthManager {
 
         if (AuthnStatus.SUCCESS.equals(authnMessageContext.getAuthnStatus())) {
             generateAuthnToken(authnMessageContext);
+            if (log.isDebugEnabled() && IdentityUtil.isTokenLoggable(AuthAPIConstants.AUTH_TOKEN)) {
+                log.debug("Generated Auth token for user:  " + authnMessageContext.getUser() + "\nToken Type: " +
+                        authnMessageContext.getAuthnToken().getToken() + "\nToken: " + authnMessageContext
+                        .getAuthnToken().getToken());
+            }
         }
 
         return new AuthnResponse(authnMessageContext);
@@ -142,30 +144,30 @@ public class AuthManagerImpl implements AuthManager {
 
             authnMessageContext.setUser(user);
             authnMessageContext.setAuthnStatus(AuthnStatus.SUCCESS);
+
+            if (log.isDebugEnabled()) {
+                log.debug("User: " + user + " is successfully authenticated.");
+            }
         } else {
             authnMessageContext.setAuthnStatus(AuthnStatus.FAIL);
-            HashMap<String, String> errorProperties = getErrorProperties(username);
+            Map<String, String> errorProperties = getAuthFailureErrorProperties(username);
+            if (log.isDebugEnabled()) {
+                log.debug("Authentication failed for user: " + username);
+            }
             throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage(),
                     AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode(), AuthAPIClientException.ErrorType
                     .BAD_REQUEST, errorProperties);
         }
     }
 
-    private HashMap<String, String> getErrorProperties(String username) {
-        HashMap<String, String> errorProperties = new HashMap<>();
-        errorProperties.put(AuthAPIConstants.AUTH_FAILURE, "true");
-        errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
-        errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
+    private boolean authenticate(String username, Object credential, UserStoreManager userStoreManager) throws
+            AuthAPIClientException {
 
-        IdentityErrorMsgContext errorContext = IdentityUtil.getIdentityErrorMsg();
-        IdentityUtil.clearIdentityErrorMsg();
-        if(errorContext != null){
-            int remainingAttempts = errorContext.getMaximumLoginAttempts() - errorContext
-                    .getFailedLoginAttempts();
-            errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString(remainingAttempts));
+        try {
+            return userStoreManager.authenticate(username, credential);
+        } catch (UserStoreException e) {
+            throw handleAuthError(username, credential, e);
         }
-
-        return errorProperties;
     }
 
     private UserStoreManager getUserStoreManager(String tenantDomain) throws AuthAPIServerException {
@@ -184,122 +186,7 @@ public class AuthManagerImpl implements AuthManager {
         }
     }
 
-    private boolean authenticate(String username, Object credential, UserStoreManager userStoreManager) throws
-            AuthAPIClientException {
-
-        try {
-            return userStoreManager.authenticate(username, credential);
-        } catch (UserStoreException e) {
-            String errorMessage = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage();
-            String errorCode = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode();
-            AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.BAD_REQUEST;
-            HashMap<String, String> errorProperties = new HashMap<>();
-            IdentityErrorMsgContext errorContext = IdentityUtil.getIdentityErrorMsg();
-            IdentityUtil.clearIdentityErrorMsg();
-            errorProperties.put(AuthAPIConstants.AUTH_FAILURE, "true");
-            errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
-            errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
-
-            if (errorContext != null && errorContext.getErrorCode() != null) {
-                if (log.isDebugEnabled()) {
-                    StringBuilder debugString = new StringBuilder();
-                    debugString.append("Identity error message context is not null. Error details are as follows.");
-                    debugString.append("errorCode : " + errorCode + "\n");
-                    debugString.append("username : " + username + "\n");
-                    log.debug(debugString.toString());
-                }
-                errorCode = errorContext.getErrorCode();
-                if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_NOT_CONFIRMED_ERROR_CODE)) {
-                    errorMessage = "User Account is not yet confirmed.";
-                    errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
-                    errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "account.confirmation.pending");
-                    Object domain = IdentityUtil.threadLocalProperties.get().get(RE_CAPTCHA_USER_DOMAIN);
-                    if (domain != null) {
-                        username = IdentityUtil.addDomainToName(username, domain.toString());
-                        errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
-                    }
-                } else if (errorCode.equals(IdentityCoreConstants
-                        .ADMIN_FORCED_USER_PASSWORD_RESET_VIA_EMAIL_LINK_ERROR_CODE)) {
-                    errorMessage = "Password reset is required. A password reset link has been sent to your " +
-                            "registered email address.";
-                    errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
-                    errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "password.reset.pending");
-                } else if (errorCode.equals(
-                        IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_ERROR_CODE)) {
-                    errorMessage = "Password reset is required.";
-                    errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
-                    String tenantDomain = MultitenantUtils.getTenantDomain(username);
-                    errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "password.reset.pending");
-                    errorProperties.put(AuthAPIConstants.TENANT_DOMAIN_PARAM, tenantDomain);
-                    errorProperties.put(AuthAPIConstants.CONFIRMATION_PARAM, credential.toString());
-                } else if (isShowAuthFailureReason()) {
-
-                    String reason = null;
-                    if (errorCode.contains(":")) {
-                        String[] errorCodeReason = errorCode.split(":");
-                        errorCode = errorCodeReason[0];
-                        if (errorCodeReason.length > 1) {
-                            reason = errorCodeReason[1];
-                        }
-                    }
-                    int remainingAttempts = errorContext.getMaximumLoginAttempts() - errorContext
-                            .getFailedLoginAttempts();
-
-                    if (log.isDebugEnabled()) {
-                        StringBuilder debugString = new StringBuilder();
-                        debugString.append("Identity error message context is not null. Error details are as follows.");
-                        debugString.append("errorCode : " + errorCode + "\n");
-                        debugString.append("username : " + username + "\n");
-                        debugString.append("remainingAttempts : " + remainingAttempts);
-                        log.debug(debugString.toString());
-                    }
-                    if (errorCode.equals(UserCoreConstants.ErrorCode.INVALID_CREDENTIAL)) {
-                        errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString(remainingAttempts));
-                    } else if (errorCode.equals(UserCoreConstants.ErrorCode.USER_IS_LOCKED)) {
-                        errorMessage = "User Account is Locked.";
-                        errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
-                        if (remainingAttempts == 0) {
-                            if (StringUtils.isBlank(reason)) {
-                                errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, "0");
-                            } else {
-                                errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString
-                                        (remainingAttempts));
-                                errorProperties.put(AuthAPIConstants.LOCKED_REASON, reason);
-                                errorMessage = errorMessage + reason;
-                            }
-                        } else {
-                            if (!StringUtils.isBlank(reason)) {
-                                errorProperties.put(AuthAPIConstants.LOCKED_REASON, reason);
-                                errorMessage = errorMessage + reason;
-                            }
-                        }
-                    } else if (errorCode.equals(UserCoreConstants.ErrorCode.USER_DOES_NOT_EXIST)) {
-                        errorMessage = "User Account Does not exists";
-                        errorType = AuthAPIClientException.ErrorType.NOT_FOUND;
-                    } else if (errorCode.equals(IdentityCoreConstants.USER_ACCOUNT_DISABLED_ERROR_CODE)) {
-                        errorMessage = "User Account is Disabled.";
-                        errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
-                    } else if (errorCode.equals(
-                            IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_MISMATCHED_ERROR_CODE)) {
-                        errorMessage = "Password Reset is required.";
-                        errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
-                        errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
-                    }
-                } else {
-                    if (log.isDebugEnabled()) {
-                        log.debug("Unknown identity error code.");
-                    }
-                }
-            } else {
-                if (log.isDebugEnabled()) {
-                    log.debug("Identity error message context is null");
-                }
-            }
-            throw new AuthAPIClientException(errorMessage, errorCode, errorType, errorProperties, e);
-        }
-    }
-
-    public String getUserStoreDomain(String username) {
+    private String getUserStoreDomain(String username) {
 
         if (!username.contains("/")) {
             if (UserCoreUtil.getDomainFromThreadLocal() != null && !UserCoreUtil.getDomainFromThreadLocal().isEmpty()) {
@@ -310,28 +197,193 @@ public class AuthManagerImpl implements AuthManager {
         return UserCoreUtil.extractDomainFromName(username);
     }
 
-    private boolean isShowAuthFailureReason(){
+    private Map<String, String> getAuthFailureErrorProperties(String username) {
 
-        Map<String, String> parameterMap = getAuthenticatorConfig().getParameterMap();
-        String showAuthFailureReason = null;
-        if (parameterMap != null) {
-            showAuthFailureReason = parameterMap.get(FrameworkConstants.SHOW_AUTHFAILURE_RESON_CONFIG);
-            if (log.isDebugEnabled()) {
-                log.debug("showAuthFailureReason has been set as : " + showAuthFailureReason);
-            }
-        }
-        return showAuthFailureReason != null && "true".equals(showAuthFailureReason);
+        HashMap<String, String> errorProperties = new HashMap<>();
+        errorProperties.put(AuthAPIConstants.AUTH_FAILURE, "true");
+        errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "login.fail.message");
+        errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
+
+        return errorProperties;
     }
 
-    private AuthenticatorConfig getAuthenticatorConfig() {
+    private IdentityErrorMsgContext getIdentityErrorContext() {
 
-        AuthenticatorConfig authConfig = FileBasedConfigurationBuilder.getInstance().getAuthenticatorBean
-                (FrameworkConstants.BASIC_AUTHENTICATOR_CLASS);
-        if (authConfig == null) {
-            authConfig = new AuthenticatorConfig();
-            authConfig.setParameterMap(new HashMap());
+        IdentityErrorMsgContext errorContext = IdentityUtil.getIdentityErrorMsg();
+        IdentityUtil.clearIdentityErrorMsg();
+
+        return errorContext;
+    }
+
+    private AuthAPIClientException buildUserAccountNotConfirmedError(String username, IdentityErrorMsgContext
+            errorMsgContext, Map<String, String> errorProperties, Throwable e) {
+
+        String errorMessage = "User Account is not yet confirmed.";
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
+        errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "account.confirmation.pending");
+        Object domain = IdentityUtil.threadLocalProperties.get().get(RE_CAPTCHA_USER_DOMAIN);
+        if (domain != null) {
+            username = IdentityUtil.addDomainToName(username, domain.toString());
+            errorProperties.put(AuthAPIConstants.FAILED_USERNAME, username);
         }
-        return authConfig;
+
+        return new AuthAPIClientException(errorMessage, errorMsgContext.getErrorCode(), errorType, errorProperties, e);
+    }
+
+    private AuthAPIClientException buildAdminForcedPasswordResetViaEmailError(String username,
+                                                                              IdentityErrorMsgContext
+                                                                                      errorMsgContext, Map<String,
+            String> errorProperties, Throwable e) {
+
+        String errorMessage = "Password reset is required. A password reset link has been sent to your " +
+                "registered email address.";
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
+        errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "password.reset.pending");
+
+        return new AuthAPIClientException(errorMessage, errorMsgContext.getErrorCode(), errorType, errorProperties, e);
+    }
+
+    private AuthAPIClientException buildAdminForcedPasswordResetViaOTPError(String username, Object credential,
+                                                                            IdentityErrorMsgContext errorMsgContext,
+                                                                            Map<String, String> errorProperties,
+                                                                            Throwable e) {
+
+        String errorMessage = "Password reset is required.";
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
+        String tenantDomain = MultitenantUtils.getTenantDomain(username);
+        errorProperties.put(AuthAPIConstants.AUTH_FAILURE_MSG, "password.reset.pending");
+        errorProperties.put(AuthAPIConstants.TENANT_DOMAIN_PARAM, tenantDomain);
+        errorProperties.put(AuthAPIConstants.CONFIRMATION_PARAM, credential.toString());
+
+        return new AuthAPIClientException(errorMessage, errorMsgContext.getErrorCode(), errorType, errorProperties, e);
+    }
+
+    private AuthAPIClientException buildInvalidCredentialError(String username, IdentityErrorMsgContext
+            errorMsgContext, Map<String, String> errorProperties, Throwable e) {
+
+
+        String errorMessage = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage();
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.BAD_REQUEST;
+        int remainingAttempts = errorMsgContext.getMaximumLoginAttempts() - errorMsgContext.getFailedLoginAttempts();
+        errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString(remainingAttempts));
+
+        return new AuthAPIClientException(errorMessage, errorMsgContext.getErrorCode(), errorType, errorProperties, e);
+    }
+
+    private AuthAPIClientException buildAccountLockedError(String username, IdentityErrorMsgContext errorMsgContext,
+                                                           Map<String, String> errorProperties, Throwable e) {
+
+        String errorMessage = "User Account is Locked. ";
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
+
+        int remainingAttempts = getRemainingLoginAttempts(errorMsgContext);
+        errorProperties.put(AuthAPIConstants.REMAINING_ATTEMPTS, Integer.toString(remainingAttempts));
+
+        String errorCode = errorMsgContext.getErrorCode();
+        String reason = null;
+        if (errorCode.contains(":")) {
+            String[] errorCodeReason = errorCode.split(":");
+            errorCode = errorCodeReason[0];
+            if (errorCodeReason.length > 1) {
+                reason = errorCodeReason[1];
+            }
+        }
+
+        if (!StringUtils.isBlank(reason)) {
+            errorProperties.put(AuthAPIConstants.LOCKED_REASON, reason);
+            errorMessage = errorMessage + reason;
+        }
+
+        return new AuthAPIClientException(errorMessage, errorCode, errorType, errorProperties, e);
+    }
+
+    private AuthAPIClientException buildUserNotFoundError(String username, IdentityErrorMsgContext errorMsgContext,
+                                                          Map<String, String> errorProperties, Throwable e) {
+
+        String errorMessage = "User Account Does not exists";
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.NOT_FOUND;
+
+        return new AuthAPIClientException(errorMessage, errorMsgContext.getErrorCode(), errorType, errorProperties, e);
+    }
+
+    private AuthAPIClientException buildUserAccountDisabledError(String username, IdentityErrorMsgContext
+            errorMsgContext, Map<String, String> errorProperties, Throwable e) {
+
+        String errorMessage = "User Account is Disabled.";
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
+
+        return new AuthAPIClientException(errorMessage, errorMsgContext.getErrorCode(), errorType, errorProperties, e);
+    }
+
+    private AuthAPIClientException buildAdminForcedPasswordResetViaOTPMismatchedError(String username,
+                                                                                      IdentityErrorMsgContext
+                                                                                              errorMsgContext,
+                                                                                      Map<String, String>
+                                                                                              errorProperties,
+                                                                                      Throwable e) {
+
+        String errorMessage = "Password Reset is required.";
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.NOT_ACCEPTABLE;
+
+        return new AuthAPIClientException(errorMessage, errorMsgContext.getErrorCode(), errorType, errorProperties, e);
+    }
+
+    private AuthAPIClientException handleAuthError(String username, Object credential, UserStoreException e) {
+
+        String errorMessage = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getMessage();
+        String errorCode = AuthAPIConstants.Error.ERROR_INVALID_CREDENTIALS.getCode();
+        AuthAPIClientException.ErrorType errorType = AuthAPIClientException.ErrorType.BAD_REQUEST;
+        Map<String, String> errorProperties = getAuthFailureErrorProperties(username);
+        IdentityErrorMsgContext errorContext = getIdentityErrorContext();
+
+        if (log.isDebugEnabled()) {
+            log.debug("Authentication error occurred while authenticating user: " + username);
+        }
+
+        if (errorContext != null && errorContext.getErrorCode() != null) {
+
+            errorCode = errorContext.getErrorCode();
+            if (log.isDebugEnabled()) {
+                StringBuilder debugString = new StringBuilder();
+                debugString.append("Identity error message context is not null. Error details are as follows.\n");
+                debugString.append("errorCode : " + errorCode + "\n");
+                debugString.append("username : " + username + "\n");
+                debugString.append("remainingLoginAttempts : " + getRemainingLoginAttempts(errorContext) + "\n");
+                log.debug(debugString.toString());
+            }
+
+            switch (errorCode) {
+                case IdentityCoreConstants.USER_ACCOUNT_NOT_CONFIRMED_ERROR_CODE:
+                    return buildUserAccountNotConfirmedError(username, errorContext, errorProperties, e);
+                case IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_EMAIL_LINK_ERROR_CODE:
+                    return buildAdminForcedPasswordResetViaEmailError(username, errorContext, errorProperties, e);
+                case IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_ERROR_CODE:
+                    return buildAdminForcedPasswordResetViaOTPError(username, credential, errorContext,
+                            errorProperties, e);
+                case UserCoreConstants.ErrorCode.INVALID_CREDENTIAL:
+                    return buildInvalidCredentialError(username, errorContext, errorProperties, e);
+                case UserCoreConstants.ErrorCode.USER_IS_LOCKED:
+                    return buildAccountLockedError(username, errorContext, errorProperties, e);
+                case UserCoreConstants.ErrorCode.USER_DOES_NOT_EXIST:
+                    return buildUserNotFoundError(username, errorContext, errorProperties, e);
+                case IdentityCoreConstants.USER_ACCOUNT_DISABLED_ERROR_CODE:
+                    return buildUserAccountDisabledError(username, errorContext, errorProperties, e);
+                case IdentityCoreConstants.ADMIN_FORCED_USER_PASSWORD_RESET_VIA_OTP_MISMATCHED_ERROR_CODE:
+                    return buildAdminForcedPasswordResetViaOTPMismatchedError(username, errorContext,
+                            errorProperties, e);
+            }
+        } else {
+            if (log.isDebugEnabled()) {
+                log.debug("Identity error message context is null.");
+            }
+        }
+
+        return new AuthAPIClientException(errorMessage, errorCode, errorType, errorProperties, e);
+    }
+
+    private int getRemainingLoginAttempts(IdentityErrorMsgContext errorMsgContext) {
+
+        return errorMsgContext.getMaximumLoginAttempts() - errorMsgContext.getFailedLoginAttempts();
     }
 
 }
