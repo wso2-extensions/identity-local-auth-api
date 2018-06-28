@@ -41,6 +41,7 @@ public class AuthAPIConstants {
     public static final String LOCKED_REASON = "lockedReason";
 
     public static final String AUTH_TOKEN = "AuthToken";
+    public static final String ERROR_REASON_SEPARATOR = ":";
 
 
     public enum Error {

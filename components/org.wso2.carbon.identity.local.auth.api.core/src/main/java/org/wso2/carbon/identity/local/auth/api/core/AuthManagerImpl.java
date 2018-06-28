@@ -281,8 +281,8 @@ public class AuthManagerImpl implements AuthManager {
 
         String errorCode = errorMsgContext.getErrorCode();
         String reason = null;
-        if (errorCode.contains(":")) {
-            String[] errorCodeReason = errorCode.split(":");
+        if (errorCode.contains(AuthAPIConstants.ERROR_REASON_SEPARATOR)) {
+            String[] errorCodeReason = errorCode.split(AuthAPIConstants.ERROR_REASON_SEPARATOR);
             errorCode = errorCodeReason[0];
             if (errorCodeReason.length > 1) {
                 reason = errorCodeReason[1];
