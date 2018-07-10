@@ -3,7 +3,7 @@ swagger: '2.0'
 # Prolog
 ######################################################
 info:
-  version: "1.0"
+  version: "1.1"
   title: "WSO2 Identity Server Rest API - Authentication"
   description: |
     This document specifies a **RESTful API** for WSO2 **Identity Server** .
@@ -35,7 +35,7 @@ host: apis.is.com
 # Will be prefixed to all paths.
 
 # if the tenant domain is carbon.super basepath can be /api/identity/auth/v0.1 like this too.
-basePath: /t/{tenant-domain}/api/identity/auth/v1.0
+basePath: /t/{tenant-domain}/api/identity/auth/v1.1
 
 # The following media types can be passed as input in message bodies of the API.
 # The actual media type must be specified in the Content-Type header field of the request.
@@ -60,9 +60,11 @@ paths:
       description: |
          This API is used to authenticate the user and to get a JWT that can be used to identify the user authenticated
       x-wso2-request: |
-        curl -k -v -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json"  "https://localhost:9443/api/identity/auth/v1.0/authenticate"
+        curl -k -v -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json"
+        "https://localhost:9443/api/identity/auth/v1.1/authenticate"
 
-        curl -k -v -X POST -H "Content-Type: application/json" -d '{ "username": "admin","password": "admin"}' "https://localhost:9443/api/identity/auth/v1.0/authenticate"
+        curl -k -v -X POST -H "Content-Type: application/json" -d '{ "username": "admin","password": "admin"}'
+        "https://localhost:9443/api/identity/auth/v1.1/authenticate"
 
       x-wso2-response: |
         {"token": "eyJ4NXQiOiJObUptT0dVeE16WmxZak0yWkRSaE5UWmxZVEExWXpkaFpUUmlPV0UwTldJMk0ySm1PVGMxWkEiLCJraWQiOiJObUptT0dVeE16WmxZak0yWkRSaE5UWmxZVEExWXpkaFpUUmlPV0UwTldJMk0ySm1PVGMxWkEiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiX01yYUVvZjlzdXN3aHNabC1sOXkxQSIsImFjciI6InVybjptYWNlOmluY29tbW9uOmlhcDpzaWx2ZXIiLCJzdWIiOiJhZG1pbiIsImF1ZCI6WyJmOVpRR182UFdSbTRidUZIcWkzWGw4SkZpZGNhIl0sImF6cCI6ImY5WlFHXzZQV1JtNGJ1RkhxaTNYbDhKRmlkY2EiLCJpc3MiOiJodHRwczpcL1wvbG9jYWxob3N0Ojk0NDNcL29hdXRoMlwvdG9rZW4iLCJleHAiOjE1Mjg4ODg2NDksImlhdCI6MTUyODg4NTA0OX0.EhOa4TDMroWrZfKFXq0wJU4bLSq79GvTXsZVpb3hJkEFL7OSx0YKZ6A9FhAi4TUcRRpFyti74kNGcU2DcRg_UZVQ9drq4L_YfdPBvqDUfwt8Au0Q3lRVVE-nvNzbJVa3IukxD6KSBMqynua6RtLRv5n3P6MuHy8uWDJR4KxMlDc"}
@@ -118,9 +120,11 @@ paths:
       description: |
         This API is used to retrieve parameters set by authentication framework to be accessed by authentication endpoint
       x-wso2-request: |
-        curl -k -X GET "https://localhost:9443/api/identity/auth/v1.0/context/<sessionKey>" -H "Authorization: Basic <Base64Encoded[username:password]>" -H "accept: application/json"
+        curl -k -X GET "https://localhost:9443/api/identity/auth/v1.1/context/<sessionKey>" -H "Authorization: Basic
+        <Base64Encoded[username:password]>" -H "accept: application/json"
       x-wso2-curl: |
-        curl -k -X GET "https://localhost:9443/api/identity/auth/v1.0/context/7a6886ab-b02f-424f-9cd4-adf5e92f0798" -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "accept: application/json"
+        curl -k -X GET "https://localhost:9443/api/identity/auth/v1.1/context/7a6886ab-b02f-424f-9cd4-adf5e92f0798"
+        -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "accept: application/json"
       x-wso2-response: |
         {
           "parameters": [
