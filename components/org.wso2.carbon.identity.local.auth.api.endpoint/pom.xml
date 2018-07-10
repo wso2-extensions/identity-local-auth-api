@@ -26,7 +26,6 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>org.wso2.carbon.identity.local.auth.api</groupId>
     <artifactId>org.wso2.carbon.identity.local.auth.api.endpoint</artifactId>
     <packaging>war</packaging>
     <name>WSO2 Identity -  Authentication REST API</name>
@@ -146,6 +145,11 @@
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.application.common</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon.identity.framework</groupId>
+            <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
