@@ -215,6 +215,11 @@
             </dependency>
             <dependency>
                 <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
+                <version>${carbon.identity.framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
                 <artifactId>org.wso2.carbon.identity.base</artifactId>
                 <version>${carbon.identity.framework.version}</version>
             </dependency>
@@ -322,7 +327,7 @@
 
         <carbon.kernel.version>4.4.11</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version>[4.4.0, 5.0.0)</carbon.kernel.imp.pkg.version>
-        <carbon.identity.framework.version>5.7.5</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.12.24</carbon.identity.framework.version>
         <carbon.identity.framework.imp.pkg.version>[5.7.0, 6.0.0)</carbon.identity.framework.imp.pkg.version>
         <carbon.user.api.imp.pkg.version>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version>
         <carbon.base.imp.pkg.version>[1.0.0, 2.0.0)</carbon.base.imp.pkg.version>

@@ -49,7 +49,7 @@ public class AuthenticateApi  {
     
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Authenticate User \n", notes = "This API is used to authenticate the user and to get a JWT that can be used to identify the user authenticated\n", response = AuthenticationSuccessResponseDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Authenticate User\n", notes = "This API is used to authenticate the user and to get a JWT that can be used to identify the user authenticated\n", response = AuthenticationSuccessResponseDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 202, message = "Authentication accepted"),
         
