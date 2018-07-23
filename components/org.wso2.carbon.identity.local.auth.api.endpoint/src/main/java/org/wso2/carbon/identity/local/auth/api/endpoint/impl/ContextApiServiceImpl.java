@@ -25,12 +25,10 @@ import org.wso2.carbon.identity.application.authentication.framework.context.Aut
 import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.local.auth.api.endpoint.ContextApiService;
 import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ErrorDTO;
-import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ParameterDTO;
 import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ParametersDTO;
 
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.Response;
 
@@ -43,7 +41,7 @@ public class ContextApiServiceImpl extends ContextApiService {
 
         AuthenticationContext context = FrameworkUtils.getAuthenticationContextFromCache(sessionKey);
         if (context != null) {
-            Map<String, String> endpointParams = context.getEndpointParams();
+            Map<String, Serializable> endpointParams = context.getEndpointParams();
             if (StringUtils.isNotBlank(parameters)) {
                 String[] paramArray = parameters.split(",");
                 endpointParams.entrySet().retainAll(Arrays.asList(paramArray));
@@ -61,17 +59,11 @@ public class ContextApiServiceImpl extends ContextApiService {
         }
     }
 
-    private Response buildResponse(Map<String, String> params) {
+    private Response buildResponse(Map<String, Serializable> params) {
 
         ParametersDTO parametersDTO = new ParametersDTO();
-        List<ParameterDTO> paramList = new ArrayList<>(params.size());
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            ParameterDTO parameterDTO = new ParameterDTO();
-            parameterDTO.setKey(entry.getKey());
-            parameterDTO.setValue(entry.getValue());
-            paramList.add(parameterDTO);
-        }
-        parametersDTO.setParameters(paramList);
+
+        parametersDTO.putAll(params);
         return Response.ok(parametersDTO).build();
     }
 }

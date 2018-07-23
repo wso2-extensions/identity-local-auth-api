@@ -18,9 +18,8 @@
 
 package org.wso2.carbon.identity.local.auth.api.endpoint.dto;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.wso2.carbon.identity.local.auth.api.endpoint.dto.ParameterDTO;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.swagger.annotations.*;
 import com.fasterxml.jackson.annotation.*;
@@ -32,23 +31,8 @@ import javax.validation.constraints.NotNull;
 
 
 @ApiModel(description = "")
-public class ParametersDTO  {
+public class ParametersDTO extends HashMap<String, Object> {
   
-  
-  
-  private List<ParameterDTO> parameters = new ArrayList<ParameterDTO>();
-
-  
-  /**
-   **/
-  @ApiModelProperty(value = "")
-  @JsonProperty("parameters")
-  public List<ParameterDTO> getParameters() {
-    return parameters;
-  }
-  public void setParameters(List<ParameterDTO> parameters) {
-    this.parameters = parameters;
-  }
 
   
 
@@ -56,8 +40,7 @@ public class ParametersDTO  {
   public String toString()  {
     StringBuilder sb = new StringBuilder();
     sb.append("class ParametersDTO {\n");
-    
-    sb.append("  parameters: ").append(parameters).append("\n");
+    sb.append("  " + super.toString()).append("\n");
     sb.append("}\n");
     return sb.toString();
   }
