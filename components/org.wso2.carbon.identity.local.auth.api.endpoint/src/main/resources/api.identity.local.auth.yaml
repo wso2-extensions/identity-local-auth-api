@@ -112,7 +112,9 @@ paths:
 
     get:
       description: |
-        This API is used to retrieve parameters set by authentication framework to be accessed by authentication endpoint
+        This API is used to retrieve parameters set by authentication framework to be accessed by authentication
+        endpoint. Parameters should be set by calling AuthenticationContext.addEndpointParam() to be eligible to
+        query with this API. This can be used to retieve sensitive parameters required for the authentication endpoint.
       x-wso2-request: |
         curl -k -X GET "https://localhost:9443/api/identity/auth/v1.1/context/<sessionKey>" -H "Authorization: Basic
         <Base64Encoded[username:password]>" -H "accept: application/json"
@@ -131,7 +133,7 @@ paths:
       -
         name: sessionKey
         in: path
-        description:  This represents the Revoke Receipt ID.
+        description:  This represents the session data key that will uniquely identify the authentication context
         required: true
         type: 'string'
 
