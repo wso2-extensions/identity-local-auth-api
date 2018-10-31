@@ -26,6 +26,7 @@
         <jaxrs:serviceBeans>
             <bean class="org.wso2.carbon.identity.local.auth.api.endpoint.AuthenticateApi"/>
             <bean class="org.wso2.carbon.identity.local.auth.api.endpoint.ContextApi"/>
+            <bean class="org.wso2.carbon.identity.local.auth.api.endpoint.DataApi"/>
             
         </jaxrs:serviceBeans>
         <jaxrs:providers>

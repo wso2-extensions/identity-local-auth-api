@@ -18,6 +18,7 @@
 
 package org.wso2.carbon.identity.local.auth.api.core.internal;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.osgi.framework.BundleContext;
@@ -30,6 +31,10 @@ import org.osgi.service.component.annotations.ReferencePolicy;
 import org.wso2.carbon.identity.local.auth.api.core.AuthManager;
 import org.wso2.carbon.identity.local.auth.api.core.AuthManagerImpl;
 import org.wso2.carbon.identity.local.auth.api.core.JWTAuthTokenGenerator;
+import org.wso2.carbon.identity.local.auth.api.core.ParameterResolver;
+import org.wso2.carbon.identity.local.auth.api.core.ParameterResolverService;
+import org.wso2.carbon.identity.local.auth.api.core.impl.SessionDataKeyConsentParamResolverImpl;
+import org.wso2.carbon.identity.local.auth.api.core.impl.SessionDataKeyParamResolverImpl;
 import org.wso2.carbon.idp.mgt.IdpManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -53,6 +58,11 @@ public class AuthAPIServiceComponent {
             BundleContext bundleContext = componentContext.getBundleContext();
             bundleContext.registerService(AuthManager.class.getName(), new AuthManagerImpl(new JWTAuthTokenGenerator
                     ()), null);
+
+            bundleContext.registerService(ParameterResolverService.class,
+                    AuthAPIServiceComponentDataHolder.getInstance().getParameterResolverService(), null);
+            bundleContext.registerService(ParameterResolver.class, new SessionDataKeyParamResolverImpl(), null);
+            bundleContext.registerService(ParameterResolver.class, new SessionDataKeyConsentParamResolverImpl(), null);
             log.info("Auth API Service Component  is activated.");
         } catch (Throwable e) {
             log.error("Error while activating Auth API Service Component.", e);
@@ -94,5 +104,24 @@ public class AuthAPIServiceComponent {
             log.debug("IdPManager is unregistered in Auth API Service Component.");
         }
         AuthAPIServiceComponentDataHolder.getInstance().setIdpManager(null);
+    }
+
+    @Reference(name = "auth.api.parameter.resolver", service = ParameterResolver.class, cardinality =
+            ReferenceCardinality.MULTIPLE, policy = ReferencePolicy.DYNAMIC, unbind = "removeParamResolver")
+    protected void addParamResolver(ParameterResolver resolver) {
+
+        if (resolver != null && StringUtils.isNotBlank(resolver.getRegisteredKeyType())) {
+            if (log.isDebugEnabled()) {
+                log.debug("Registering parameter resolver for " + resolver.getRegisteredKeyType());
+            }
+            AuthAPIServiceComponentDataHolder.getInstance().getParameterResolverService().registerResolver(resolver);
+        } else {
+            log.warn("Registering parameter resolver failed. Resolver or KeyType is null or empty");
+        }
+    }
+
+    protected void removeParamResolver(ParameterResolver resolver) {
+
+        AuthAPIServiceComponentDataHolder.getInstance().getParameterResolverService().unregisterResolver(resolver);
     }
 }

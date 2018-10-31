@@ -22,7 +22,7 @@ info:
 
 # The schemes supported by the API
 schemes:
-  - https
+- https
 
 # The domain of the API.
 # This is configured by the customer during deployment.
@@ -40,7 +40,7 @@ basePath: /t/{tenant-domain}/api/identity/auth/v1.1
 # The default is json, i.e. the Content-Type header is not needed to
 # be set, but supporting it serves extensibility.
 consumes:
-  - application/json
+- application/json
 
 # The following media types may be passed as output in message bodies of the API.
 # The media type(s) consumable by the requestor is specified in the Accept header field
@@ -50,13 +50,13 @@ consumes:
 # The default of the Accept header is json, i.e. there is not needed to
 # set the value, but supporting it serves extensibility.
 produces:
-  - application/json
+- application/json
 
 paths:
   /authenticate:
     post:
       description: |
-         This API is used to authenticate the user and to get a JWT that can be used to identify the user authenticated
+        This API is used to authenticate the user and to get a JWT that can be used to identify the user authenticated
       x-wso2-request: |
         curl -k -v -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json"
         "https://localhost:9443/api/identity/auth/v1.1/authenticate"
@@ -68,20 +68,18 @@ paths:
         Authenticate User
       # post parameters:
       parameters:
-        -
-          in: header
-          name: Authorization
-          description:  Authorization header that contains the 'Basic' word followed by a space and a base64-encoded username:password string. Required unless username, password not passed in request body.
-          required: false
-          type: string
+      - in: header
+        name: Authorization
+        description:  Authorization header that contains the 'Basic' word followed by a space and a base64-encoded username:password string. Required unless username, password not passed in request body.
+        required: false
+        type: string
 
-        -
-          name: credentials
-          in: body
-          description:  Username and password in request body. Required unless username, password not passed with 'Authorization' header.
-          required: false
-          schema:
-            $ref: '#/definitions/AuthenticationRequest'
+      - name: credentials
+        in: body
+        description:  Username and password in request body. Required unless username, password not passed with 'Authorization' header.
+        required: false
+        schema:
+          $ref: '#/definitions/AuthenticationRequest'
 
       responses:
         202:
@@ -91,21 +89,21 @@ paths:
         400:
           description: Bad Request
           schema:
-             $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
         401:
           description: Unauthorized
           schema:
-             $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
         404:
           description: Not Found
           schema:
-             $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
         500:
           description: Server Error
           schema:
-             $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
       tags:
-        - Authenticate
+      - Authenticate
 
   # Endpoint used get the properties for the authentication context
   "/context/{sessionKey}":
@@ -130,15 +128,13 @@ paths:
       operationId: getContextParameters
 
       parameters:
-      -
-        name: sessionKey
+      - name: sessionKey
         in: path
         description:  This represents the session data key that will uniquely identify the authentication context
         required: true
         type: 'string'
 
-      -
-        name: parameters
+      - name: parameters
         in: query
         description:  Comma separated list of parameters to filter. If none provided all available parameters will be sent.
         required: false
@@ -151,55 +147,119 @@ paths:
         400:
           description: Bad Request
           schema:
-             $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
         401:
           description: Unauthorized
           schema:
-             $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
         404:
           description: Not Found
           schema:
-             $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
         500:
           description: Server Error
           schema:
-             $ref: '#/definitions/Error'
+            $ref: '#/definitions/Error'
       tags:
-        - Authentication
+      - Authentication
+
+  "/data/{keyType}/{correlationKey}":
+    get:
+      description: |
+        This API is used to retrieve the sensitive parameters can't be sent as query parameters during the authentication flow.
+        <b>Note:</b> This call may not be idempotent if IS is configured to clear the data on retrieval to prevent multiple retrievals.
+      x-wso2-request: |
+        curl -k -X GET "https://localhost:9443/api/identity/auth/v1.1/data/<keyType>/<sessionKey>" -H "Authorization:
+               Basic
+        <Base64Encoded[username:password]>" -H "accept: application/json"
+      x-wso2-curl: |
+        curl -k -X GET "https://localhost:9443/api/identity/auth/v1
+                    .1/data/AuthRequestKey/7a6886ab-b02f-424f-9cd4-adf5e92f0798"
+        -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "accept: application/json"
+      x-wso2-response: |
+        {
+          "paramKey": "paramValue"
+        }
+      summary: |
+        Retrieve sensitive parameters used at authentication flow
+      operationId: getSensitiveParameters
+
+      parameters:
+      - name: keyType
+        in: path
+        description: |
+          This represents the corelation key type. eg. AuthRequestKey, OauthConsentKey. 'AuthRequestKey' can be
+          used to query parameters set by authentication framework and relates to sessionDataKey. 'OauthConsentKey'
+          can be used to query parameters set by oauth concent flow and relates to sessionDataKeyConsent.
+        required: true
+        type: 'string'
+      - name: correlationKey
+        in: path
+        description:  This represents correlation key which is of type 'keyType'
+        required: true
+        type: 'string'
+      - name: parameters
+        in: query
+        description:  Comma separated list of parameters to filter. If none provided all available parameters will be sent.
+        required: false
+        type: 'string'
+      responses:
+        200:
+          description: OK
+          schema:
+            $ref: '#/definitions/Parameters'
+        400:
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: Not Found
+          schema:
+            $ref: '#/definitions/Error'
+        500:
+          description: Server Error
+          schema:
+            $ref: '#/definitions/Error'
+      tags:
+      - Authentication
 
 
 definitions:
-#-----------------------------------------------------
-# Authentication request  object
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Authentication request  object
+  #-----------------------------------------------------
   AuthenticationRequest:
     type: object
     properties:
       username:
         type: string
       password:
-       type: string
+        type: string
 
-#-----------------------------------------------------
-# Authentication success response  object
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Authentication success response  object
+  #-----------------------------------------------------
   AuthenticationSuccessResponse:
     type: object
     properties:
       token:
         type: string
 
-#-----------------------------------------------------
-# Properties object
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Properties object
+  #-----------------------------------------------------
   Parameters:
     type: object
     additionalProperties:
       type: object
 
-#-----------------------------------------------------
-# Error response  object
-#-----------------------------------------------------
+  #-----------------------------------------------------
+  # Error response  object
+  #-----------------------------------------------------
   Error:
     type: object
     properties:

@@ -18,6 +18,8 @@
 
 package org.wso2.carbon.identity.local.auth.api.core.internal;
 
+import org.wso2.carbon.identity.local.auth.api.core.ParameterResolverService;
+import org.wso2.carbon.identity.local.auth.api.core.impl.ParameterResolverServiceImpl;
 import org.wso2.carbon.idp.mgt.IdpManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -29,6 +31,7 @@ public class AuthAPIServiceComponentDataHolder {
     private static AuthAPIServiceComponentDataHolder instance = new AuthAPIServiceComponentDataHolder();
     private RealmService realmService;
     private IdpManager idpManager;
+    private ParameterResolverService parameterResolverService = new ParameterResolverServiceImpl();
 
     public static AuthAPIServiceComponentDataHolder getInstance() {
         return instance;
@@ -48,5 +51,10 @@ public class AuthAPIServiceComponentDataHolder {
 
     public void setIdpManager(IdpManager idpManager) {
         this.idpManager = idpManager;
+    }
+
+    public ParameterResolverService getParameterResolverService() {
+
+        return parameterResolverService;
     }
 }
