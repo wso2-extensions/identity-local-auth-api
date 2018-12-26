@@ -48,7 +48,7 @@ public class ContextApi  {
     @Path("/{sessionKey}")
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
-    @io.swagger.annotations.ApiOperation(value = "Retrieve a authentication context parameter.\n", notes = "This API is used to retrieve parameters set by authentication framework to be accessed by authentication endpoint\n", response = ParametersDTO.class)
+    @io.swagger.annotations.ApiOperation(value = "Retrieve a authentication context parameter.\n", notes = "This API is used to retrieve parameters set by authentication framework to be accessed by authentication\nendpoint. Parameters should be set by calling AuthenticationContext.addEndpointParam() to be eligible to\nquery with this API. This can be used to retieve sensitive parameters required for the authentication endpoint.\n", response = ParametersDTO.class)
     @io.swagger.annotations.ApiResponses(value = { 
         @io.swagger.annotations.ApiResponse(code = 200, message = "OK"),
         
@@ -60,7 +60,7 @@ public class ContextApi  {
         
         @io.swagger.annotations.ApiResponse(code = 500, message = "Server Error") })
 
-    public Response getContextParameters(@ApiParam(value = "This represents the Revoke Receipt ID.",required=true ) @PathParam("sessionKey")  String sessionKey,
+    public Response getContextParameters(@ApiParam(value = "This represents the session data key that will uniquely identify the authentication context",required=true ) @PathParam("sessionKey")  String sessionKey,
     @ApiParam(value = "Comma separated list of parameters to filter. If none provided all available parameters will be sent.") @QueryParam("parameters")  String parameters)
     {
     return delegate.getContextParameters(sessionKey,parameters);
