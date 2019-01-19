@@ -102,7 +102,7 @@ public class AuthManagerImpl implements AuthManager {
             if (splitValues.length == 2) {
                 byte[] decodedBytes = Base64.decodeBase64(splitValues[1].trim().getBytes());
                 String credentialString = new String(decodedBytes, StandardCharsets.UTF_8);
-                String[] splitCredentials = credentialString.split(":");
+                String[] splitCredentials = credentialString.split(":", 2);
                 if (splitCredentials.length == 2) {
                     String username = splitCredentials[0];
                     String password = splitCredentials[1];
