@@ -60,7 +60,7 @@ paths:
       x-wso2-request: |
         curl -k -v -X POST -H "Authorization: Basic <Base64Encoded[username:password]>" -H "Content-Type: application/json"
         "https://localhost:9443/api/identity/auth/v1.2/authenticate"
-        curl -k -v -X POST -H "Content-Type: application/json" -d '{ "[username]": "[username]","[password]": "[password]"}'
+        curl -k -v -X POST -H "Content-Type: application/json" -d '{ "username": "[username]","password": "[password]"}'
         "https://localhost:9443/api/identity/auth/v1.2/authenticate"
       x-wso2-curl: |
         curl -k -v -X POST -H "Authorization: Basic YWRtaW46YWRtaW4=" -H "Content-Type: application/json"
