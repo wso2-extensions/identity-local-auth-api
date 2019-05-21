@@ -227,6 +227,94 @@ paths:
       tags:
       - Authentication
 
+  # Endpoint uses to send retrieve session information
+  /session:
+    get:
+      tags:
+        - "Session Information"
+      description: "This API is used to retrieve user's session information."
+      summary: "Get active sessions"
+      operationId: "getUserSession"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "Successful response"
+          schema:
+            $ref: '#/definitions/AllSessions'
+        400:
+          description: "Bad Request"
+          schema:
+            $ref: '#/definitions/Error'
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: '#/definitions/Error'
+        404:
+          description: "Not Found"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Server Error"
+          schema:
+            $ref: '#/definitions/Error'
+
+    delete:
+      tags:
+        - "Session Termination"
+      description: "This API is used to terminate user's session."
+      summary: "Terminate all sessions"
+      operationId: "terminateAllSessions"
+      responses:
+        200:
+          description: "Successful response"
+        204:
+          description: "No content"
+        400:
+          description: "Bad Request"
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Server Error"
+          schema:
+            $ref: "#/definitions/Error"
+
+  /session/{sessionId}:
+    delete:
+      tags:
+        - "Session Termination"
+      description: "This API is used to terminate user's session."
+      summary: "Terminate a session"
+      operationId: "terminateASession"
+      parameters:
+        -
+          name: "sessionId"
+          in: "path"
+          description: "id of the session"
+          required: true
+          type: "string"
+      responses:
+        200:
+          description: "Successful response"
+        204:
+          description: "No content"
+        400:
+          description: "Bad Request"
+          schema:
+            $ref: "#/definitions/Error"
+        401:
+          description: "Unauthorized"
+          schema:
+            $ref: "#/definitions/Error"
+        500:
+          description: "Server Error"
+          schema:
+            $ref: "#/definitions/Error"
+
 
 definitions:
   #-----------------------------------------------------
@@ -256,6 +344,58 @@ definitions:
     type: object
     additionalProperties:
       type: object
+
+  #-----------------------------------------------------
+  # The Session Response  object
+  #-----------------------------------------------------
+  Application:
+    type: "object"
+    properties:
+      subject:
+        type: "string"
+        description: "User name of application."
+      app:
+        type: "string"
+        description: "Name of application."
+
+  #-----------------------------------------------------
+  # The Session Response  object
+  #-----------------------------------------------------
+  Session:
+    type: "object"
+    properties:
+      applications:
+        type: "array"
+        description: "Active applications in session."
+        items:
+          $ref: '#/definitions/Application'
+      userAgent:
+        type: "string"
+        description: "User agent of session."
+      ip:
+        type: "string"
+        description: "Ip address of particular session."
+      loginTime:
+        type: "string"
+        description: "Login time of particular session."
+      lastAccessTime:
+        type: "string"
+        description: "Last access time of particular session."
+      sessionId:
+        type: "string"
+        description: "Id of particular session."
+
+  #-----------------------------------------------------
+  # The AllSessions Response  object
+  #-----------------------------------------------------
+  AllSessions:
+    type: "object"
+    properties:
+      sessions:
+        type: "array"
+        description: "Active applications in session."
+        items:
+          $ref: '#/definitions/Session'
 
   #-----------------------------------------------------
   # Error response  object
