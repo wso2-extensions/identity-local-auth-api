@@ -328,6 +328,7 @@
         <carbon.base.imp.pkg.version>[1.0.0, 2.0.0)</carbon.base.imp.pkg.version>
         <identity.inbound.auth.oauth.version>6.0.83</identity.inbound.auth.oauth.version>
         <identity.inbound.auth.oauth.imp.pkg.version>[6.0.0, 7.0.0)</identity.inbound.auth.oauth.imp.pkg.version>
+        <carbon.identity.user.session.version>1.0.1</carbon.identity.user.session.version>
 
         <cxf-bundle.version>3.2.8</cxf-bundle.version>
         <jackson.version>1.9.13</jackson.version>

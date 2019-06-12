@@ -91,7 +91,7 @@
             <groupId>org.wso2.carbon.identity.governance</groupId>
             <artifactId>org.wso2.carbon.identity.user.session</artifactId>
             <scope>provided</scope>
-            <version>1.0.1</version>
+            <version>${carbon.identity.user.session.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.cxf</groupId>
