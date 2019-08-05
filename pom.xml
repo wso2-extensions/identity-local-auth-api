@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.wso2</groupId>
         <artifactId>wso2</artifactId>
-        <version>1</version>
+        <version>1.2</version>
     </parent>
 
     <groupId>org.wso2.carbon.identity.local.auth.api</groupId>
@@ -152,11 +152,6 @@
                 <version>${commons-lang.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-logging</groupId>
-                <artifactId>commons-logging</artifactId>
-                <version>${commons-logging.version}</version>
-            </dependency>
-            <dependency>
                 <groupId>commons-codec.wso2</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
@@ -238,25 +233,18 @@
                 <artifactId>junit</artifactId>
                 <version>${junit.version}</version>
             </dependency>
+            <!-- Pax Logging -->
+            <dependency>
+                <groupId>org.ops4j.pax.logging</groupId>
+                <artifactId>pax-logging-api</artifactId>
+                <version>${pax.logging.api.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.felix</groupId>
-                    <artifactId>maven-scr-plugin</artifactId>
-                    <version>${maven.scr.plugin.version}</version>
-                    <executions>
-                        <execution>
-                            <id>generate-scr-scrdescriptor</id>
-                            <goals>
-                                <goal>scr</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
@@ -268,6 +256,25 @@
                             <SCM-Revision>${buildNumber}</SCM-Revision>
                         </instructions>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <configuration>
+                        <source>1.8</source>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>attach-javadocs</id>
+                            <goals>
+                                <goal>jar</goal>
+                            </goals>
+                            <configuration>
+                                <!--This parameter disables doclint-->
+                                <doclint>none</doclint>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -292,20 +299,37 @@
                 <artifactId>buildnumber-maven-plugin</artifactId>
                 <version>${maven.buildnumber.plugin.version}</version>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <configuration>
+                    <source>1.8</source>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                        <configuration>
+                            <!--This parameter disables doclint-->
+                            <doclint>none</doclint>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
     <properties>
         <maven.buildnumber.plugin.version>1.4</maven.buildnumber.plugin.version>
         <maven.compiler.plugin.version>3.7.0</maven.compiler.plugin.version>
-        <maven.scr.plugin.version>1.24.0</maven.scr.plugin.version>
         <maven.build.helper.plugin.version>3.0.0</maven.build.helper.plugin.version>
         <maven.war.plugin.version>2.2</maven.war.plugin.version>
-        <maven.bundle.plugin.version>2.4.0</maven.bundle.plugin.version>
+        <maven.bundle.plugin.version>3.2.0</maven.bundle.plugin.version>
 
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
         <commons-lang.imp.pkg.version>[2.6.0,3.0.0)</commons-lang.imp.pkg.version>
-        <commons-logging.version>1.2</commons-logging.version>
         <commons-logging.imp.pkg.version>[1.2,2.0)</commons-logging.imp.pkg.version>
         <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
         <commons-codec.imp.pkg.version>[1.4.0,2.0.0)</commons-codec.imp.pkg.version>
@@ -320,14 +344,14 @@
         <osgi.framework.imp.pkg.version>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version>
         <osgi.service.component.imp.pkg.version>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version>
 
-        <carbon.kernel.version>4.5.0-m1</carbon.kernel.version>
+        <carbon.kernel.version>4.5.0-m3</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version>
-        <carbon.identity.framework.version>5.13.0</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version>[5.13.0, 6.0.0)</carbon.identity.framework.imp.pkg.version>
+        <carbon.identity.framework.version>5.14.0</carbon.identity.framework.version>
+        <carbon.identity.framework.imp.pkg.version>[5.14.0, 6.0.0)</carbon.identity.framework.imp.pkg.version>
         <carbon.user.api.imp.pkg.version>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version>
         <carbon.base.imp.pkg.version>[1.0.0, 2.0.0)</carbon.base.imp.pkg.version>
-        <identity.inbound.auth.oauth.version>6.0.83</identity.inbound.auth.oauth.version>
-        <identity.inbound.auth.oauth.imp.pkg.version>[6.0.0, 7.0.0)</identity.inbound.auth.oauth.imp.pkg.version>
+        <identity.inbound.auth.oauth.version>6.2.0</identity.inbound.auth.oauth.version>
+        <identity.inbound.auth.oauth.imp.pkg.version>[6.2.0, 7.0.0)</identity.inbound.auth.oauth.imp.pkg.version>
 
         <cxf-bundle.version>3.2.8</cxf-bundle.version>
         <jackson.version>1.9.13</jackson.version>
@@ -336,5 +360,8 @@
         <fasterxml.jackson.version>2.9.6</fasterxml.jackson.version>
         <junit.version>4.12</junit.version>
         <cors.filter.version>1.7.0.wso2v1</cors.filter.version>
+
+        <!-- Pax Logging Version -->
+        <pax.logging.api.version>1.10.1</pax.logging.api.version>
     </properties>
 </project>
