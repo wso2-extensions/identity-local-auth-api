@@ -39,7 +39,7 @@ import javax.ws.rs.core.Response;
  */
 public class AuthenticateApiServiceImpl extends AuthenticateApiService {
 
-    private final Log log = LogFactory.getLog(AuthenticateApiServiceImpl.class);
+    private static final Log log = LogFactory.getLog(AuthenticateApiServiceImpl.class);
 
     @Override
     public Response authenticatePost(String authorization, AuthenticationRequestDTO credentials) {
