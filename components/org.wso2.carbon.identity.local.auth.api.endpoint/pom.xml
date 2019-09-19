@@ -52,7 +52,7 @@
                             <directory>src/main/webapp</directory>
                         </resource>
                     </webResources>
-                    <warName>api#identity#auth#v1.2</warName>
+                    <warName>api#identity#auth#v1.1</warName>
                 </configuration>
             </plugin>
             <!-- Plugin for generating the swagger server stubs-->
