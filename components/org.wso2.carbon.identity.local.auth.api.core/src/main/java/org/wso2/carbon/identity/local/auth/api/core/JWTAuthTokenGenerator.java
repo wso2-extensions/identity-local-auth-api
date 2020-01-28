@@ -27,6 +27,8 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.base.MultitenantConstants;
 import org.wso2.carbon.core.util.KeyStoreManager;
 import org.wso2.carbon.identity.application.common.model.IdentityProvider;
@@ -55,6 +57,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class JWTAuthTokenGenerator implements AuthTokenGenerator {
 
+    private static final Log log = LogFactory.getLog(JWTAuthTokenGenerator.class);
     private static final String KEY_STORE_EXTENSION = ".jks";
     // We are keeping a private key map which will have private key for each tenant domain. We are keeping this as a
     // static Map since then we don't need to read the key from keystore every time.
@@ -63,6 +66,8 @@ public class JWTAuthTokenGenerator implements AuthTokenGenerator {
     private JWSAlgorithm signatureAlgorithm = new JWSAlgorithm(JWSAlgorithm.RS256.getName());
     // Validity period is set as 3 m by default.
     private long validityPeriod = 180L;
+    // System flag to allow the weak keys (key length less than 2048) to be used for the signing.
+    private static final String ALLOW_WEAK_RSA_SIGNER_KEY = "allow_weak_rsa_signer_key";
 
     @Override
     public void init() throws AuthAPIException {
@@ -134,7 +139,7 @@ public class JWTAuthTokenGenerator implements AuthTokenGenerator {
             privateKeys.put(tenantId, privateKey);
         }
 
-        JWSSigner signer = new RSASSASigner((RSAPrivateKey) privateKey);
+        JWSSigner signer = createJWSSigner((RSAPrivateKey) privateKey);
         SignedJWT signedJWT = new SignedJWT(new JWSHeader(signatureAlgorithm), jwtClaimsSet);
         try {
             signedJWT.sign(signer);
@@ -143,6 +148,22 @@ public class JWTAuthTokenGenerator implements AuthTokenGenerator {
                     tenantDomain, e);
         }
         return signedJWT.serialize();
+    }
+
+    /**
+     * Create JWSSigner using the server level configurations and return.
+     *
+     * @param privateKey RSA Private key.
+     * @return  JWSSigner
+     */
+    public JWSSigner createJWSSigner(RSAPrivateKey privateKey) {
+
+        boolean allowWeakKey = Boolean.parseBoolean(System.getProperty(ALLOW_WEAK_RSA_SIGNER_KEY));
+        if (allowWeakKey && log.isDebugEnabled()) {
+            log.debug("System flag 'allow_weak_rsa_signer_key' is  enabled. So weak keys (key length less than 2048) " +
+                    " will be allowed for signing.");
+        }
+        return new RSASSASigner(privateKey, allowWeakKey);
     }
 
     protected String generateNonce() {
