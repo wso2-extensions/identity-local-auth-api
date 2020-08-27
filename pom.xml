@@ -353,10 +353,10 @@
         <identity.inbound.auth.oauth.version>6.2.18</identity.inbound.auth.oauth.version>
         <identity.inbound.auth.oauth.imp.pkg.version>[6.2.18, 7.0.0)</identity.inbound.auth.oauth.imp.pkg.version>
 
-        <cxf-bundle.version>3.2.8</cxf-bundle.version>
+        <cxf-bundle.version>3.3.7</cxf-bundle.version>
         <jackson.version>1.9.13</jackson.version>
         <spring-web.version>4.1.6.RELEASE</spring-web.version>
-        <swagger-jaxrs.version>1.5.20</swagger-jaxrs.version>
+        <swagger-jaxrs.version>1.6.2</swagger-jaxrs.version>
         <fasterxml.jackson.version>2.9.6</fasterxml.jackson.version>
         <junit.version>4.12</junit.version>
         <cors.filter.version>1.7.0.wso2v1</cors.filter.version>
