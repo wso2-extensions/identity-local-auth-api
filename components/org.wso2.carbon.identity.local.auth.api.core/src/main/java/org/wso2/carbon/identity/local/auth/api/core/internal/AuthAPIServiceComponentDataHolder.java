@@ -20,6 +20,7 @@ package org.wso2.carbon.identity.local.auth.api.core.internal;
 
 import org.wso2.carbon.identity.local.auth.api.core.ParameterResolverService;
 import org.wso2.carbon.identity.local.auth.api.core.impl.ParameterResolverServiceImpl;
+import org.wso2.carbon.identity.multi.attribute.login.mgt.MultiAttributeLoginService;
 import org.wso2.carbon.idp.mgt.IdpManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -32,6 +33,17 @@ public class AuthAPIServiceComponentDataHolder {
     private RealmService realmService;
     private IdpManager idpManager;
     private ParameterResolverService parameterResolverService = new ParameterResolverServiceImpl();
+    private MultiAttributeLoginService multiAttributeLoginService;
+
+    public MultiAttributeLoginService getMultiAttributeLoginService() {
+
+        return multiAttributeLoginService;
+    }
+
+    public void setMultiAttributeLoginService(MultiAttributeLoginService multiAttributeLoginService) {
+
+        this.multiAttributeLoginService = multiAttributeLoginService;
+    }
 
     public static AuthAPIServiceComponentDataHolder getInstance() {
         return instance;
