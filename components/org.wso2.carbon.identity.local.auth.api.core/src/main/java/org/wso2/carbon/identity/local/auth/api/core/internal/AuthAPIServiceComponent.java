@@ -35,7 +35,6 @@ import org.wso2.carbon.identity.local.auth.api.core.ParameterResolver;
 import org.wso2.carbon.identity.local.auth.api.core.ParameterResolverService;
 import org.wso2.carbon.identity.local.auth.api.core.impl.SessionDataKeyConsentParamResolverImpl;
 import org.wso2.carbon.identity.local.auth.api.core.impl.SessionDataKeyParamResolverImpl;
-import org.wso2.carbon.identity.multi.attribute.login.mgt.MultiAttributeLoginService;
 import org.wso2.carbon.idp.mgt.IdpManager;
 import org.wso2.carbon.user.core.service.RealmService;
 
@@ -124,21 +123,5 @@ public class AuthAPIServiceComponent {
     protected void removeParamResolver(ParameterResolver resolver) {
 
         AuthAPIServiceComponentDataHolder.getInstance().getParameterResolverService().unregisterResolver(resolver);
-    }
-
-    @Reference(
-            name = "MultiAttributeLoginService",
-            service = MultiAttributeLoginService.class,
-            cardinality = ReferenceCardinality.MANDATORY,
-            policy = ReferencePolicy.DYNAMIC,
-            unbind = "unsetMultiAttributeLoginService")
-    protected void setMultiAttributeLoginService(MultiAttributeLoginService multiAttributeLoginService) {
-
-        AuthAPIServiceComponentDataHolder.getInstance().setMultiAttributeLoginService(multiAttributeLoginService);
-    }
-
-    protected void unsetMultiAttributeLoginService(MultiAttributeLoginService multiAttributeLoginService) {
-
-        AuthAPIServiceComponentDataHolder.getInstance().setMultiAttributeLoginService(null);
     }
 }
