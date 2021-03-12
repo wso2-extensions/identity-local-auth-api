@@ -22,6 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.model.IdentityErrorMsgContext;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
@@ -136,15 +137,12 @@ public class AuthManagerImpl implements AuthManager {
         String userTenantDomain = MultitenantUtils.getTenantDomain(username);
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
         UserStoreManager userStoreManager = getUserStoreManager(userTenantDomain);
-        if (AuthAPIServiceComponentDataHolder.getInstance().getMultiAttributeLoginService().
-                isEnabled(userTenantDomain)) {
-            ResolvedUserResult resolvedUser = AuthAPIServiceComponentDataHolder.getInstance().
-                    getMultiAttributeLoginService().resolveUser(tenantAwareUsername, userTenantDomain);
-            if (resolvedUser != null &&  ResolvedUserResult.UserResolvedStatus.SUCCESS.
-                    equals(resolvedUser.getResolvedStatus())) {
-                tenantAwareUsername = resolvedUser.getUser().getUsername();
-                username = UserCoreUtil.addTenantDomainToEntry(tenantAwareUsername, userTenantDomain);
-            }
+        ResolvedUserResult resolvedUserResult = FrameworkUtils.
+                processMultiAttributeLoginIdentification(tenantAwareUsername, userTenantDomain);
+        if (resolvedUserResult != null &&  ResolvedUserResult.UserResolvedStatus.SUCCESS.
+                equals(resolvedUserResult.getResolvedStatus())) {
+            tenantAwareUsername = resolvedUserResult.getUser().getUsername();
+            username = UserCoreUtil.addTenantDomainToEntry(tenantAwareUsername, userTenantDomain);
         }
         if (authenticate(tenantAwareUsername, credential, userStoreManager)) {
             User user = new User();

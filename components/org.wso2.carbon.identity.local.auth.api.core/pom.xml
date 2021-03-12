@@ -117,10 +117,7 @@
                             org.wso2.carbon.identity.application.authentication.framework.context; version="${carbon.identity.framework.imp.pkg.version}",
                             org.wso2.carbon.identity.application.authentication.framework.util; version="${carbon.identity.framework.imp.pkg.version}",
                             org.wso2.carbon.identity.oauth.cache; version="${identity.inbound.auth.oauth.imp.pkg.version}",
-                            org.wso2.carbon.identity.oauth.common;
-                            version="${identity.inbound.auth.oauth.imp.pkg.version}",
-                            org.wso2.carbon.identity.multi.attribute.login.mgt.*;
-                            version="${carbon.identity.framework.imp.pkg.version}",
+                            org.wso2.carbon.identity.oauth.common; version="${identity.inbound.auth.oauth.imp.pkg.version}"
                         </Import-Package>
                         <Export-Package>
                             !org.wso2.carbon.identity.local.auth.api.core.internal,
