@@ -22,6 +22,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.application.authentication.framework.util.FrameworkUtils;
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.model.IdentityErrorMsgContext;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
@@ -35,6 +36,7 @@ import org.wso2.carbon.identity.local.auth.api.core.model.AuthnMessageContext;
 import org.wso2.carbon.identity.local.auth.api.core.model.AuthnRequest;
 import org.wso2.carbon.identity.local.auth.api.core.model.AuthnResponse;
 import org.wso2.carbon.identity.local.auth.api.core.model.AuthnStatus;
+import org.wso2.carbon.identity.multi.attribute.login.mgt.ResolvedUserResult;
 import org.wso2.carbon.user.api.UserRealm;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.api.UserStoreManager;
@@ -135,7 +137,13 @@ public class AuthManagerImpl implements AuthManager {
         String userTenantDomain = MultitenantUtils.getTenantDomain(username);
         String tenantAwareUsername = MultitenantUtils.getTenantAwareUsername(username);
         UserStoreManager userStoreManager = getUserStoreManager(userTenantDomain);
-
+        ResolvedUserResult resolvedUserResult = FrameworkUtils.
+                processMultiAttributeLoginIdentification(tenantAwareUsername, userTenantDomain);
+        if (resolvedUserResult != null &&  ResolvedUserResult.UserResolvedStatus.SUCCESS.
+                equals(resolvedUserResult.getResolvedStatus())) {
+            tenantAwareUsername = resolvedUserResult.getUser().getUsername();
+            username = UserCoreUtil.addTenantDomainToEntry(tenantAwareUsername, userTenantDomain);
+        }
         if (authenticate(tenantAwareUsername, credential, userStoreManager)) {
             User user = new User();
             user.setUserName(tenantAwareUsername);
