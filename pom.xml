@@ -28,7 +28,7 @@
 
     <groupId>org.wso2.carbon.identity.local.auth.api</groupId>
     <artifactId>identity-local-auth-api</artifactId>
-    <version>2.3.2-SNAPSHOT</version>
+    <version>2.4.3-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>WSO2 Identity - Authentication API</name>
     <url>http://wso2.org</url>
@@ -153,7 +153,7 @@
                 <version>${commons-lang.wso2.version}</version>
             </dependency>
             <dependency>
-                <groupId>commons-codec.wso2</groupId>
+                <groupId>org.wso2.orbit.commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
                 <version>${commons-codec.version}</version>
             </dependency>
@@ -244,6 +244,11 @@
                 <groupId>org.ops4j.pax.logging</groupId>
                 <artifactId>pax-logging-api</artifactId>
                 <version>${pax.logging.api.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.framework</groupId>
+                <artifactId>org.wso2.carbon.identity.multi.attribute.login.mgt</artifactId>
+                <version>${carbon.identity.framework.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -337,7 +342,7 @@
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
         <commons-lang.imp.pkg.version>[2.6.0,3.0.0)</commons-lang.imp.pkg.version>
         <commons-logging.imp.pkg.version>[1.2,2.0)</commons-logging.imp.pkg.version>
-        <commons-codec.version>1.4.0.wso2v1</commons-codec.version>
+        <commons-codec.version>1.14.0.wso2v1</commons-codec.version>
         <commons-codec.imp.pkg.version>[1.4.0,2.0.0)</commons-codec.imp.pkg.version>
 
         <nimbusds.version>7.3.0.wso2v1</nimbusds.version>
@@ -350,19 +355,19 @@
         <osgi.framework.imp.pkg.version>[1.7.0, 2.0.0)</osgi.framework.imp.pkg.version>
         <osgi.service.component.imp.pkg.version>[1.2.0, 2.0.0)</osgi.service.component.imp.pkg.version>
 
-        <carbon.kernel.version>4.5.0</carbon.kernel.version>
+        <carbon.kernel.version>4.6.0</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version>
-        <carbon.identity.framework.version>5.14.67</carbon.identity.framework.version>
+        <carbon.identity.framework.version>5.20.3</carbon.identity.framework.version>
         <carbon.identity.framework.imp.pkg.version>[5.14.67, 6.0.0)</carbon.identity.framework.imp.pkg.version>
         <carbon.user.api.imp.pkg.version>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version>
         <carbon.base.imp.pkg.version>[1.0.0, 2.0.0)</carbon.base.imp.pkg.version>
         <identity.inbound.auth.oauth.version>6.2.18</identity.inbound.auth.oauth.version>
         <identity.inbound.auth.oauth.imp.pkg.version>[6.2.18, 7.0.0)</identity.inbound.auth.oauth.imp.pkg.version>
 
-        <cxf-bundle.version>3.2.8</cxf-bundle.version>
+        <cxf-bundle.version>3.3.7</cxf-bundle.version>
         <jackson.version>1.9.13</jackson.version>
-        <spring-web.version>4.1.6.RELEASE</spring-web.version>
-        <swagger-jaxrs.version>1.5.20</swagger-jaxrs.version>
+        <spring-web.version>4.3.29.RELEASE</spring-web.version>
+        <swagger-jaxrs.version>1.6.2</swagger-jaxrs.version>
         <fasterxml.jackson.version>2.9.6</fasterxml.jackson.version>
         <junit.version>4.12</junit.version>
         <cors.filter.version>1.7.0.wso2v1</cors.filter.version>

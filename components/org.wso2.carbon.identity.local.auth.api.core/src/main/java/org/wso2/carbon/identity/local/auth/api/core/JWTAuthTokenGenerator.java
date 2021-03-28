@@ -161,7 +161,7 @@ public class JWTAuthTokenGenerator implements AuthTokenGenerator {
         boolean allowWeakKey = Boolean.parseBoolean(System.getProperty(ALLOW_WEAK_RSA_SIGNER_KEY));
         if (allowWeakKey && log.isDebugEnabled()) {
             log.debug("System flag 'allow_weak_rsa_signer_key' is  enabled. So weak keys (key length less than 2048) " +
-                    " will be used for the signing.");
+                    " will be allowed for signing.");
         }
         return new RSASSASigner(privateKey, allowWeakKey);
     }
