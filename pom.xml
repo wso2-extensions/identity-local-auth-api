@@ -41,6 +41,7 @@
     </scm>
 
     <modules>
+        <module>components/org.wso2.carbon.api.server.local.auth.api</module>
         <module>components/org.wso2.carbon.identity.local.auth.api.endpoint</module>
         <module>components/org.wso2.carbon.identity.local.auth.api.core</module>
     </modules>
@@ -191,6 +192,11 @@
             <dependency>
                 <groupId>org.wso2.carbon.identity.local.auth.api</groupId>
                 <artifactId>org.wso2.carbon.identity.local.auth.api.core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wso2.carbon.identity.local.auth.api</groupId>
+                <artifactId>org.wso2.carbon.api.server.local.auth.api</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
