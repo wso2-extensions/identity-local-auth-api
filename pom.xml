@@ -161,11 +161,6 @@
                 <artifactId>cors-filter</artifactId>
                 <version>${cors.filter.version}</version>
             </dependency>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit.version}</version>
-            </dependency>
             <!-- Pax Logging -->
             <dependency>
                 <groupId>org.ops4j.pax.logging</groupId>
@@ -296,7 +291,6 @@
         <spring-web.version>4.3.29.RELEASE</spring-web.version>
         <swagger-jaxrs.version>1.6.2</swagger-jaxrs.version>
         <fasterxml.jackson.version>2.9.6</fasterxml.jackson.version>
-        <junit.version>4.12</junit.version>
         <cors.filter.version>1.7.0.wso2v1</cors.filter.version>
 
         <!-- Pax Logging Version -->
