@@ -24,7 +24,7 @@
         <groupId>org.wso2.carbon.identity.local.auth.api</groupId>
         <artifactId>identity-local-auth-api</artifactId>
         <version>2.5.2-SNAPSHOT</version>
-        <relativePath>../..</relativePath>
+        <relativePath>../../pom.xml</relativePath>
     </parent>
 
     <artifactId>org.wso2.carbon.api.server.local.auth.api</artifactId>
@@ -168,11 +168,6 @@
             <groupId>org.wso2.carbon.identity.framework</groupId>
             <artifactId>org.wso2.carbon.identity.application.authentication.framework</artifactId>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.thetransactioncompany.wso2</groupId>
