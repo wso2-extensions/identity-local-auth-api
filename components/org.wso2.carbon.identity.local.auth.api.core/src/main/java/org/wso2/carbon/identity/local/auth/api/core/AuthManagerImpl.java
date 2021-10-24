@@ -26,6 +26,7 @@ import org.wso2.carbon.identity.application.authentication.framework.util.Framew
 import org.wso2.carbon.identity.application.common.model.User;
 import org.wso2.carbon.identity.core.model.IdentityErrorMsgContext;
 import org.wso2.carbon.identity.core.util.IdentityCoreConstants;
+import org.wso2.carbon.identity.core.util.IdentityTenantUtil;
 import org.wso2.carbon.identity.core.util.IdentityUtil;
 import org.wso2.carbon.identity.local.auth.api.core.constants.AuthAPIConstants;
 import org.wso2.carbon.identity.local.auth.api.core.exception.AuthAPIClientException;
@@ -132,6 +133,12 @@ public class AuthManagerImpl implements AuthManager {
             authnMessageContext.setAuthnStatus(AuthnStatus.ERROR);
             throw new AuthAPIClientException(AuthAPIConstants.Error.ERROR_INVALID_USER.getMessage(), AuthAPIConstants
                     .Error.ERROR_INVALID_USER.getCode(), AuthAPIClientException.ErrorType.BAD_REQUEST);
+        }
+
+        // Update resource owner username when tenant qualified URLs enabled.
+        if (IdentityTenantUtil.isTenantQualifiedUrlsEnabled() && !username.endsWith(
+                IdentityTenantUtil.getTenantDomainFromContext())) {
+            username = UserCoreUtil.addTenantDomainToEntry(username, IdentityTenantUtil.getTenantDomainFromContext());
         }
 
         String userTenantDomain = MultitenantUtils.getTenantDomain(username);
