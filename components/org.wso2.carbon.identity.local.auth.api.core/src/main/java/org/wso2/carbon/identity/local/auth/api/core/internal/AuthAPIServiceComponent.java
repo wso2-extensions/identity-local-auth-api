@@ -33,6 +33,7 @@ import org.wso2.carbon.identity.local.auth.api.core.AuthManagerImpl;
 import org.wso2.carbon.identity.local.auth.api.core.JWTAuthTokenGenerator;
 import org.wso2.carbon.identity.local.auth.api.core.ParameterResolver;
 import org.wso2.carbon.identity.local.auth.api.core.ParameterResolverService;
+import org.wso2.carbon.identity.local.auth.api.core.impl.AuthenticationErrorParamResolver;
 import org.wso2.carbon.identity.local.auth.api.core.impl.SessionDataKeyConsentParamResolverImpl;
 import org.wso2.carbon.identity.local.auth.api.core.impl.SessionDataKeyParamResolverImpl;
 import org.wso2.carbon.idp.mgt.IdpManager;
@@ -63,6 +64,7 @@ public class AuthAPIServiceComponent {
                     AuthAPIServiceComponentDataHolder.getInstance().getParameterResolverService(), null);
             bundleContext.registerService(ParameterResolver.class, new SessionDataKeyParamResolverImpl(), null);
             bundleContext.registerService(ParameterResolver.class, new SessionDataKeyConsentParamResolverImpl(), null);
+            bundleContext.registerService(ParameterResolver.class, new AuthenticationErrorParamResolver(), null);
             log.info("Auth API Service Component  is activated.");
         } catch (Throwable e) {
             log.error("Error while activating Auth API Service Component.", e);
