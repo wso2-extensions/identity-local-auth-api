@@ -44,8 +44,10 @@ public class DataApiServiceImpl extends DataApiService {
             Map<String, Serializable> paramMap = (resolverService).resolveParameters(keyType,
                     correlationKey, filter);
             if (paramMap.isEmpty()) {
-                LOG.warn(String.format("No parameters available for key %s (of type %s). Possibly due to expired " +
-                        "context, invalid correlation key, or replay request.", correlationKey, keyType));
+                if (LOG.isDebugEnabled()) {
+                    LOG.debug(String.format("No parameters available for key %s (of type %s). Possibly due to expired " +
+                            "context, invalid correlation key, or replay request.", correlationKey, keyType));
+                }
                 return buildError(Response.Status.NOT_FOUND, "Requested parameters are not available.");
             }
             return buildResponse(paramMap);
