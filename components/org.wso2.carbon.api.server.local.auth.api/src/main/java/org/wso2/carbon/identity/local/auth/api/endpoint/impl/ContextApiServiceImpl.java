@@ -41,6 +41,14 @@ public class ContextApiServiceImpl extends ContextApiService {
 
         AuthenticationContext context = FrameworkUtils.getAuthenticationContextFromCache(sessionKey);
         if (context != null) {
+            if (FrameworkUtils.isAuthenticationContextExpiryEnabled() &&
+                    (FrameworkUtils.getCurrentStandardNano() > context.getExpiryTime())) {
+                ErrorDTO errorDTO = new ErrorDTO();
+                errorDTO.setCode("404");
+                errorDTO.setMessage("Expired Authentication Context");
+                errorDTO.setDescription("Authentication context has expired");
+                return Response.status(Response.Status.NOT_FOUND).entity(errorDTO).build();
+            }
             Map<String, Serializable> endpointParams = context.getEndpointParams();
             if (StringUtils.isNotBlank(parameters)) {
                 String[] paramArray = parameters.split(",");
