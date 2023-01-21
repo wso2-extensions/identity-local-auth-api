@@ -75,7 +75,7 @@
         </dependency>
         <dependency>
             <groupId>org.wso2.carbon.identity.framework</groupId>
-            <artifactId>org.wso2.carbon.identity.multi.attribute.login.mgt</artifactId>
+            <artifactId>org.wso2.carbon.identity.login.resolver.mgt</artifactId>
         </dependency>
     </dependencies>
 
@@ -120,7 +120,7 @@
                             org.wso2.carbon.identity.oauth.cache; version="${identity.inbound.auth.oauth.imp.pkg.version}",
                             org.wso2.carbon.identity.oauth.common;
                             version="${identity.inbound.auth.oauth.imp.pkg.version}",
-                            org.wso2.carbon.identity.multi.attribute.login.mgt.*;
+                            org.wso2.carbon.identity.login.resolver.mgt;
                             version="${carbon.identity.framework.imp.pkg.version}",
                         </Import-Package>
                         <Export-Package>
