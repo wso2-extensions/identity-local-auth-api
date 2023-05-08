@@ -47,7 +47,7 @@ public class SessionDataKeyConsentParamResolverImpl implements ParameterResolver
             if (filter != null && !filter.isEmpty()) {
                 endpointParams.keySet().retainAll(filter);
             }
-            if (deleteOnRead) {
+            if (deleteOnRead || cacheEntry.isRemoveOnConsume()) {
                 cacheEntry.getEndpointParams().keySet().removeAll(endpointParams.keySet());
                 SessionDataCache.getInstance().clearCacheEntry(cacheKey);
                 SessionDataCache.getInstance().addToCache(cacheKey, cacheEntry);
