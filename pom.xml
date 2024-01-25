@@ -279,11 +279,11 @@
         <carbon.kernel.version>4.6.0</carbon.kernel.version>
         <carbon.kernel.imp.pkg.version>[4.5.0, 5.0.0)</carbon.kernel.imp.pkg.version>
         <carbon.identity.framework.version>5.25.28</carbon.identity.framework.version>
-        <carbon.identity.framework.imp.pkg.version>[5.20.321, 7.0.0)</carbon.identity.framework.imp.pkg.version>
+        <carbon.identity.framework.imp.pkg.version>[5.20.321, 8.0.0)</carbon.identity.framework.imp.pkg.version>
         <carbon.user.api.imp.pkg.version>[1.0.1, 2.0.0)</carbon.user.api.imp.pkg.version>
         <carbon.base.imp.pkg.version>[1.0.0, 2.0.0)</carbon.base.imp.pkg.version>
         <identity.inbound.auth.oauth.version>6.11.58</identity.inbound.auth.oauth.version>
-        <identity.inbound.auth.oauth.imp.pkg.version>[6.2.18, 7.0.0)</identity.inbound.auth.oauth.imp.pkg.version>
+        <identity.inbound.auth.oauth.imp.pkg.version>[6.2.18, 8.0.0)</identity.inbound.auth.oauth.imp.pkg.version>
 
         <cxf-bundle.version>3.3.7</cxf-bundle.version>
         <jackson.version>1.9.13</jackson.version>
