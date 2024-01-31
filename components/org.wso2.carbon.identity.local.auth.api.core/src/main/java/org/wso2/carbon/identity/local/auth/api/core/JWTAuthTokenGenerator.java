@@ -42,6 +42,7 @@ import org.wso2.carbon.identity.local.auth.api.core.model.AuthnToken;
 import org.wso2.carbon.idp.mgt.IdentityProviderManagementException;
 import org.wso2.carbon.user.api.UserStoreException;
 import org.wso2.carbon.user.core.service.RealmService;
+import org.wso2.carbon.utils.security.KeystoreUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
@@ -58,7 +59,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JWTAuthTokenGenerator implements AuthTokenGenerator {
 
     private static final Log log = LogFactory.getLog(JWTAuthTokenGenerator.class);
-    private static final String KEY_STORE_EXTENSION = ".jks";
     // We are keeping a private key map which will have private key for each tenant domain. We are keeping this as a
     // static Map since then we don't need to read the key from keystore every time.
     private static Map<Integer, Key> privateKeys = new ConcurrentHashMap<>();
@@ -187,7 +187,6 @@ public class JWTAuthTokenGenerator implements AuthTokenGenerator {
 
     private String getTenantKeyStoreName(String tenantDomain) {
 
-        String ksName = tenantDomain.trim().replace(".", "-");
-        return ksName + KEY_STORE_EXTENSION;
+        return KeystoreUtils.getKeyStoreFileLocation(tenantDomain);
     }
 }
