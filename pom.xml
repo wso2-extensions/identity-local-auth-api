@@ -41,7 +41,6 @@
 
     <modules>
         <module>components/org.wso2.carbon.api.server.local.auth.api</module>
-        <module>components/org.wso2.carbon.identity.local.auth.api.endpoint</module>
         <module>components/org.wso2.carbon.identity.local.auth.api.core</module>
     </modules>
 
