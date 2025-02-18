@@ -65,7 +65,7 @@ public class AuthAPIServiceComponent {
             bundleContext.registerService(ParameterResolver.class, new SessionDataKeyParamResolverImpl(), null);
             bundleContext.registerService(ParameterResolver.class, new SessionDataKeyConsentParamResolverImpl(), null);
             bundleContext.registerService(ParameterResolver.class, new AuthenticationErrorParamResolver(), null);
-            log.info("Auth API Service Component  is activated.");
+            log.debug("Auth API Service Component  is activated.");
         } catch (Throwable e) {
             log.error("Error while activating Auth API Service Component.", e);
         }
