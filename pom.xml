@@ -330,7 +330,7 @@
 
         <nimbusds.version>7.3.0.wso2v1</nimbusds.version>
         <nimbusds.imp.pkg.version>[7.3.0,8.0.0)</nimbusds.imp.pkg.version>
-        <json-smart.version>2.4.7</json-smart.version>
+        <json-smart.version>2.4.9</json-smart.version>
 
         <eclipse.osgi.version>3.5.100.v20160504-1419</eclipse.osgi.version>
         <org.apache.felix.annotations.version>1.2.4</org.apache.felix.annotations.version>
