@@ -68,6 +68,16 @@
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-jaxrs</artifactId>
                 <version>${swagger-jaxrs.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-lang3</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.jaxrs</groupId>
@@ -263,7 +273,7 @@
         <commons-lang.wso2.version>2.6.0.wso2v1</commons-lang.wso2.version>
         <commons-lang.imp.pkg.version>[2.6.0,3.0.0)</commons-lang.imp.pkg.version>
         <commons-logging.imp.pkg.version>[1.2,2.0)</commons-logging.imp.pkg.version>
-        <commons-codec.version>1.14.0.wso2v1</commons-codec.version>
+        <commons-codec.version>1.16.0.wso2v1</commons-codec.version>
         <commons-codec.imp.pkg.version>[1.4.0,2.0.0)</commons-codec.imp.pkg.version>
 
         <nimbusds.version>9.37.3.wso2v1</nimbusds.version>
